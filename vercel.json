@@ -1,9 +1,8 @@
 {
   "version": 2,
   "outputDirectory": "build/web",
-  "framework": null,
-"installCommand": null,
-  "buildCommand": null,
+  "installCommand": "flutter pub get",
+  "buildCommand": "flutter build web --release --tree-shake-icons --source-maps --base-href /",
   "github": {
     "silent": true
   },
