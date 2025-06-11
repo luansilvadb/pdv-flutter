@@ -1,0 +1,27 @@
+{
+  "name": "pdv-restaurant-flutter",
+  "version": "1.0.0",
+  "description": "Sistema PDV para restaurantes desenvolvido em Flutter",
+  "scripts": {
+    "build": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=canvaskit",
+    "dev": "flutter run -d chrome",
+    "clean": "flutter clean",
+    "get": "flutter pub get",
+    "analyze": "flutter analyze",
+    "test": "flutter test"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "flutter",
+    "web",
+    "pdv",
+    "restaurant",
+    "dart"
+  ],
+  "author": "PDV Restaurant Team",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}

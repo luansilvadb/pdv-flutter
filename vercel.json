@@ -3,12 +3,15 @@
   "builds": [
     {
       "src": "pubspec.yaml",
-      "use": "@dart-lang/flutter@latest",
+      "use": "@vercel/static-build",
       "config": {
-        "buildCommand": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=canvaskit"
+        "distDir": "build/web"
       }
     }
   ],
+  "buildCommand": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=canvaskit",
+  "outputDirectory": "build/web",
+  "installCommand": "flutter pub get",
   "rewrites": [
     {
       "source": "/(.*)",
@@ -33,6 +36,20 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
-  ]
+  ],
+  "functions": {
+    "app/api/**/*.dart": {
+      "runtime": "@vercel/dart@1.0.0"
+    }
+  }
 }
