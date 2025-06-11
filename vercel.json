@@ -19,7 +19,7 @@
   "installCommand": "flutter packages get",
   "buildCommand": "flutter build web --release --no-tree-shake-icons",
   "framework": null,
-  "functions": {},
+  
   "rewrites": [
     {
       "source": "/(.*)",
