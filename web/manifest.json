@@ -3,15 +3,31 @@
     "short_name": "PDV Restaurant",
     "start_url": "/",
     "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Sistema PDV moderno para restaurantes - Gestão completa de vendas, produtos e estoque",
+    "description": "Sistema PDV moderno para restaurantes - Gestão completa de vendas, produtos e estoque com tecnologia Flutter",
     "orientation": "any",
     "prefer_related_applications": false,
     "scope": "/",
     "lang": "pt-BR",
-    "categories": ["business", "productivity", "finance"],
-    "screenshots": [],
+    "dir": "ltr",
+    "categories": ["business", "productivity", "finance", "food"],
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "screenshots": [
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "Tela principal do PDV Restaurant"
+        }
+    ],
     "icons": [
         {
             "src": "icons/Icon-192.png",
@@ -36,9 +52,28 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        },
+        {
+            "src": "favicon.png",
+            "sizes": "48x48",
+            "type": "image/png",
+            "purpose": "any"
         }
     ],
     "shortcuts": [
+        {
+            "name": "Nova Venda",
+            "short_name": "Venda",
+            "description": "Iniciar uma nova venda rapidamente",
+            "url": "/nova-venda",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
         {
             "name": "Vendas",
             "short_name": "Vendas",
@@ -47,7 +82,8 @@
             "icons": [
                 {
                     "src": "icons/Icon-192.png",
-                    "sizes": "192x192"
+                    "sizes": "192x192",
+                    "type": "image/png"
                 }
             ]
         },
@@ -59,9 +95,59 @@
             "icons": [
                 {
                     "src": "icons/Icon-192.png",
-                    "sizes": "192x192"
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Relatórios",
+            "short_name": "Relatórios",
+            "description": "Visualizar relatórios de vendas",
+            "url": "/relatorios",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
                 }
             ]
         }
-    ]
+    ],
+    "protocol_handlers": [
+        {
+            "protocol": "web+pdvrestaurant",
+            "url": "/?handler=%s"
+        }
+    ],
+    "share_target": {
+        "action": "/share",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url",
+            "files": [
+                {
+                    "name": "files",
+                    "accept": ["image/*", "application/pdf"]
+                }
+            ]
+        }
+    },
+    "file_handlers": [
+        {
+            "action": "/import",
+            "accept": {
+                "text/csv": [".csv"],
+                "application/json": [".json"],
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"]
+            }
+        }
+    ],
+    "handle_links": "preferred",
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    }
 }

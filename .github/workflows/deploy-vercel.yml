@@ -1,0 +1,167 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  FLUTTER_VERSION: '3.24.5'
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        cache: true
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+    
+    - name: Analyze project source
+      run: flutter analyze --fatal-infos
+    
+    - name: Run tests
+      run: flutter test --coverage
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: coverage/lcov.info
+        fail_ci_if_error: false
+
+  build:
+    name: Build Flutter Web
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        cache: true
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Build for web (optimized)
+      run: |
+        flutter build web \
+          --release \
+          --web-renderer canvaskit \
+          --tree-shake-icons \
+          --split-debug-info=build/web/debug_symbols \
+          --source-maps \
+          --dart-define=FLUTTER_WEB_CANVASKIT_URL=https://unpkg.com/canvaskit-wasm@latest/bin/ \
+          --base-href="/"
+    
+    - name: Analyze bundle size
+      run: |
+        echo "📊 Bundle Size Analysis:"
+        du -sh build/web/
+        echo "Main bundle files:"
+        ls -lh build/web/*.{js,html,json} 2>/dev/null || true
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-build
+        path: build/web/
+        retention-days: 30
+
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: web-build
+        path: build/web/
+    
+    - name: Deploy to Vercel (Preview)
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        working-directory: ./
+        scope: ${{ secrets.VERCEL_ORG_ID }}
+
+  deploy-production:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: web-build
+        path: build/web/
+    
+    - name: Deploy to Vercel (Production)
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
+        working-directory: ./
+        scope: ${{ secrets.VERCEL_ORG_ID }}
+    
+    - name: Comment deployment URL
+      if: github.event_name == 'push'
+      run: |
+        echo "✅ Deployed to production: https://pdv-flutterr-okbg0yuqe-luandevuxs-projects.vercel.app"
+
+  lighthouse:
+    name: Lighthouse Performance Audit
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Run Lighthouse CI
+      run: |
+        npm install -g @lhci/cli@0.12.x
+        lhci autorun
+      env:
+        LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+        LHCI_BUILD_CONTEXT__COMMIT_TIME: ${{ github.event.head_commit.timestamp }}

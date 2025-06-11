@@ -3,23 +3,38 @@
   "version": "2.0.0",
   "description": "Sistema PDV moderno para restaurantes desenvolvido em Flutter",
   "scripts": {
-    "build": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=canvaskit --web-renderer canvaskit",
-    "build:vercel": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=canvaskit --web-renderer canvaskit --base-href /",
-    "build:html": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=html --web-renderer html",
-    "dev": "flutter run -d chrome --web-renderer canvaskit",
+    "build": "flutter build web --release --tree-shake-icons --web-renderer canvaskit --split-debug-info=build/web/debug_symbols --source-maps",
+    "build:vercel": "flutter build web --release --tree-shake-icons --web-renderer canvaskit --split-debug-info=build/web/debug_symbols --source-maps --base-href / --dart-define=FLUTTER_WEB_CANVASKIT_URL=https://unpkg.com/canvaskit-wasm@latest/bin/",
+    "build:optimized": "node -e \"require('child_process').execSync(process.platform === 'win32' ? 'scripts\\\\build-optimized.bat' : 'bash scripts/build-optimized.sh', {stdio: 'inherit'})\"",
+    "build:html": "flutter build web --release --tree-shake-icons --web-renderer html --split-debug-info=build/web/debug_symbols",
+    "build:analyze": "flutter build web --release --analyze-size --tree-shake-icons",
+    "dev": "flutter run -d chrome --web-renderer canvaskit --dart-define=FLUTTER_WEB_USE_SKIA=true",
     "dev:html": "flutter run -d chrome --web-renderer html",
+    "dev:profile": "flutter run -d chrome --profile --web-renderer canvaskit",
     "clean": "flutter clean && flutter pub get",
     "get": "flutter pub get",
     "analyze": "flutter analyze",
     "test": "flutter test",
-    "test:coverage": "flutter test --coverage",
+    "test:coverage": "flutter test --coverage && genhtml coverage/lcov.info -o coverage/html",
+    "test:integration": "flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart -d chrome",
     "format": "dart format .",
     "format:check": "dart format --set-exit-if-changed .",
     "lint": "flutter analyze && dart format --set-exit-if-changed .",
-    "prebuild": "flutter clean && flutter pub get",
+    "lint:fix": "dart fix --apply",
+    
     "serve": "flutter build web --release && cd build/web && python -m http.server 8080",
+    "serve:local": "cd build/web && npx http-server -p 8080 -c-1 --cors",
     "deploy:vercel": "vercel --prod",
-    "preview": "vercel"
+    "deploy:preview": "vercel",
+    "deploy:check": "vercel inspect",
+    
+    "performance:audit": "npm run build && npx lighthouse http://localhost:8080 --output html --output-path ./performance-report.html",
+    "performance:bundle": "flutter build web --analyze-size --tree-shake-icons",
+    
+    "precommit": "npm run lint && npm run test",
+    "prebuild": "npm run clean",
+    "postbuild": "node scripts/analyze-bundle.js",
+    "analyze:bundle-size": "node scripts/analyze-bundle.js"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -35,7 +50,10 @@
     "pos",
     "restaurant-management",
     "vercel",
-    "spa"
+    "spa",
+    "pwa",
+    "canvaskit",
+    "performance-optimized"
   ],
   "author": "PDV Restaurant Team",
   "license": "MIT",
@@ -43,19 +61,20 @@
     "type": "git",
     "url": "https://github.com/your-username/pdv-restaurant-flutter.git"
   },
-  "homepage": "https://pdv-restaurant-flutter.vercel.app",
+  "homepage": "https://pdv-flutterr-okbg0yuqe-luandevuxs-projects.vercel.app",
   "bugs": {
     "url": "https://github.com/your-username/pdv-restaurant-flutter/issues"
   },
   "devDependencies": {
-    "vercel": "^32.0.0"
+    "vercel": "^34.0.0",
+    "lighthouse": "^11.4.0",
+    "http-server": "^14.1.1"
   },
   "dependencies": {},
-  "vercel": {
-    "build": {
-      "env": {
-        "FLUTTER_WEB_CANVASKIT_URL": "https://www.gstatic.com/flutter-canvaskit/"
-      }
-    }
-  }
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 Edge versions"
+  ]
 }
