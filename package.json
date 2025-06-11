@@ -1,27 +1,61 @@
 {
   "name": "pdv-restaurant-flutter",
-  "version": "1.0.0",
-  "description": "Sistema PDV para restaurantes desenvolvido em Flutter",
+  "version": "2.0.0",
+  "description": "Sistema PDV moderno para restaurantes desenvolvido em Flutter",
   "scripts": {
-    "build": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=canvaskit",
-    "dev": "flutter run -d chrome",
-    "clean": "flutter clean",
+    "build": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=canvaskit --web-renderer canvaskit",
+    "build:vercel": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=canvaskit --web-renderer canvaskit --base-href /",
+    "build:html": "flutter build web --release --no-tree-shake-icons --dart-define=WEB_RENDERER=html --web-renderer html",
+    "dev": "flutter run -d chrome --web-renderer canvaskit",
+    "dev:html": "flutter run -d chrome --web-renderer html",
+    "clean": "flutter clean && flutter pub get",
     "get": "flutter pub get",
     "analyze": "flutter analyze",
-    "test": "flutter test"
+    "test": "flutter test",
+    "test:coverage": "flutter test --coverage",
+    "format": "dart format .",
+    "format:check": "dart format --set-exit-if-changed .",
+    "lint": "flutter analyze && dart format --set-exit-if-changed .",
+    "prebuild": "flutter clean && flutter pub get",
+    "serve": "flutter build web --release && cd build/web && python -m http.server 8080",
+    "deploy:vercel": "vercel --prod",
+    "preview": "vercel"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0",
+    "flutter": ">=3.7.2"
   },
   "keywords": [
     "flutter",
     "web",
     "pdv",
     "restaurant",
-    "dart"
+    "dart",
+    "point-of-sale",
+    "pos",
+    "restaurant-management",
+    "vercel",
+    "spa"
   ],
   "author": "PDV Restaurant Team",
   "license": "MIT",
-  "devDependencies": {},
-  "dependencies": {}
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/pdv-restaurant-flutter.git"
+  },
+  "homepage": "https://pdv-restaurant-flutter.vercel.app",
+  "bugs": {
+    "url": "https://github.com/your-username/pdv-restaurant-flutter/issues"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "dependencies": {},
+  "vercel": {
+    "build": {
+      "env": {
+        "FLUTTER_WEB_CANVASKIT_URL": "https://www.gstatic.com/flutter-canvaskit/"
+      }
+    }
+  }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -18,21 +18,127 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistema PDV moderno para restaurantes - Gestão completa de vendas, produtos e estoque">
+  <meta name="keywords" content="PDV, restaurante, sistema de vendas, ponto de venda, gestão">
+  <meta name="author" content="PDV Restaurant Team">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PDV Restaurant - Sistema de Ponto de Venda">
+  <meta property="og:description" content="Sistema PDV moderno para restaurantes - Gestão completa de vendas, produtos e estoque">
+  <meta property="og:image" content="icons/Icon-512.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="PDV Restaurant - Sistema de Ponto de Venda">
+  <meta property="twitter:description" content="Sistema PDV moderno para restaurantes - Gestão completa de vendas, produtos e estoque">
+  <meta property="twitter:image" content="icons/Icon-512.png">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="pdv_restaurant">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PDV Restaurant">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
+  
+  <!-- Theme color -->
+  <meta name="theme-color" content="#0175C2">
+  <meta name="msapplication-TileColor" content="#0175C2">
 
-  <title>pdv_restaurant</title>
+  <title>PDV Restaurant - Sistema de Ponto de Venda</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Preload critical resources -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Loading styles -->
+  <style>
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0175C2 0%, #014a8a 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    .loading-text {
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 18px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0175C2;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
+  <!-- Loading screen -->
+  <div class="loading-container" id="loading">
+    <div style="text-align: center;">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Carregando PDV Restaurant...</div>
+    </div>
+  </div>
+
+  <script>
+    // Service Worker registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('flutter-first-frame', function () {
+        navigator.serviceWorker.register('flutter_service_worker.js');
+      });
+    }
+    
+    // Hide loading screen when Flutter is ready
+    window.addEventListener('flutter-first-frame', function () {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.style.opacity = '0';
+        loading.style.transition = 'opacity 0.5s ease-out';
+        setTimeout(() => {
+          loading.style.display = 'none';
+        }, 500);
+      }
+    });
+    
+    // Fallback to hide loading screen after 10 seconds
+    setTimeout(() => {
+      const loading = document.getElementById('loading');
+      if (loading && loading.style.display !== 'none') {
+        loading.style.display = 'none';
+      }
+    }, 10000);
+  </script>
+  
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

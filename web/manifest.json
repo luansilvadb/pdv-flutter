@@ -1,23 +1,29 @@
 {
-    "name": "pdv_restaurant",
-    "short_name": "pdv_restaurant",
-    "start_url": ".",
+    "name": "PDV Restaurant - Sistema de Ponto de Venda",
+    "short_name": "PDV Restaurant",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "description": "Sistema PDV moderno para restaurantes - Gestão completa de vendas, produtos e estoque",
+    "orientation": "any",
     "prefer_related_applications": false,
+    "scope": "/",
+    "lang": "pt-BR",
+    "categories": ["business", "productivity", "finance"],
+    "screenshots": [],
     "icons": [
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png"
+            "sizes": "512x512", 
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-maskable-192.png",
@@ -30,6 +36,32 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Vendas",
+            "short_name": "Vendas",
+            "description": "Acesso rápido ao módulo de vendas",
+            "url": "/vendas",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Produtos",
+            "short_name": "Produtos",
+            "description": "Gerenciar produtos e cardápio",
+            "url": "/produtos",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }
