@@ -1,25 +1,34 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:provider/provider.dart';
-import '../models/product.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:provider/provider.dart'; // COMENTADO - Provider antigo
+import '../features/products/domain/entities/product_entity.dart';
 import '../constants/app_constants.dart';
-import '../providers/cart_provider.dart';
+import '../features/cart/presentation/providers/cart_provider.dart';
 import 'package:intl/intl.dart';
 
-class ProductCard extends StatefulWidget {
-  final Product product;
+/// Widget ProductCard migrado para nova arquitetura Clean Architecture + Riverpod
+///
+/// Mudanças principais:
+/// - ProductEntity ao invés de Product antigo
+/// - Consumer Riverpod ao invés de Provider
+/// - CartProvider novo (Riverpod) para adicionar produtos
+/// - Mantém visual e funcionalidade idênticos
+class ProductCard extends ConsumerStatefulWidget {
+  final ProductEntity product;
 
   const ProductCard({super.key, required this.product});
 
   @override
-  State<ProductCard> createState() => _ProductCardState();
+  ConsumerState<ProductCard> createState() => _ProductCardState();
 }
 
-class _ProductCardState extends State<ProductCard>
+class _ProductCardState extends ConsumerState<ProductCard>
     with TickerProviderStateMixin {
   bool _isHovered = false;
   bool _isPressed = false;
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
@@ -48,12 +57,8 @@ class _ProductCardState extends State<ProductCard>
       _scaleController.reverse();
     });
 
-    // Remover shimmer para evitar conflito visual
-    // _shimmerController.forward().then((_) {
-    //   _shimmerController.reset();
-    // });
-
-    context.read<CartProvider>().addProduct(widget.product);
+    // MIGRADO: Usar CartProvider Riverpod ao invés do Provider antigo
+    ref.read(cartProvider.notifier).addProduct(widget.product.id);
 
     Future.delayed(const Duration(milliseconds: 80), () {
       if (mounted) {
@@ -237,7 +242,7 @@ class _ProductCardState extends State<ProductCard>
                       ),
             ),
 
-            // Category badge
+            // Category badge - MIGRADO: usar categoryId da ProductEntity
             Positioned(
               top: 8,
               right: 8,
@@ -251,7 +256,9 @@ class _ProductCardState extends State<ProductCard>
                   ),
                 ),
                 child: Text(
-                  widget.product.category,
+                  widget
+                      .product
+                      .categoryId, // MIGRADO: categoryId da ProductEntity
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 10,

@@ -1,21 +1,25 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../models/order.dart';
+import '../../../features/cart/domain/entities/cart_item_entity.dart';
 import '../../../constants/app_constants.dart';
-import '../../../providers/cart_provider.dart';
 import 'product_image.dart';
 import 'quantity_controls.dart';
 
-/// Card individual para cada item do carrinho
+/// Card individual para cada item do carrinho - MIGRADO
+///
+/// Mudanças principais:
+/// - ConsumerWidget ao invés de StatelessWidget
+/// - Usa CartItemEntity ao invés de CartItem antigo
+/// - Remove dependência do CartProvider (widgets filhos lidam com ações)
+/// - Acessa propriedades diretamente da CartItemEntity
+/// - Mantém funcionalidade e visual idênticos
 ///
 /// Combina imagem do produto, informações e controles de quantidade
 /// em um layout responsivo e visualmente atraente.
-class CartItemCard extends StatelessWidget {
-  /// Item do carrinho a ser exibido
-  final CartItem item;
-
-  /// Provider do carrinho para interações
-  final CartProvider cartProvider;
+class CartItemCard extends ConsumerWidget {
+  /// Item do carrinho a ser exibido - MIGRADO: CartItemEntity
+  final CartItemEntity item;
 
   /// Formatador de moeda
   final NumberFormat currencyFormatter;
@@ -26,13 +30,12 @@ class CartItemCard extends StatelessWidget {
   const CartItemCard({
     super.key,
     required this.item,
-    required this.cartProvider,
     required this.currencyFormatter,
     required this.index,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.paddingMedium),
       decoration: BoxDecoration(
@@ -62,7 +65,7 @@ class CartItemCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Imagem do produto - largura fixa
+                // Imagem do produto - largura fixa - MIGRADO: CartItemEntity
                 ProductImage(item: item),
 
                 const SizedBox(width: AppSizes.paddingMedium),
@@ -72,8 +75,8 @@ class CartItemCard extends StatelessWidget {
 
                 const SizedBox(width: AppSizes.paddingSmall),
 
-                // Controles de quantidade - largura fixa
-                QuantityControls(item: item, cartProvider: cartProvider),
+                // Controles de quantidade - largura fixa - MIGRADO: remover cartProvider
+                QuantityControls(item: item),
               ],
             ),
           ),
@@ -82,14 +85,14 @@ class CartItemCard extends StatelessWidget {
     );
   }
 
-  /// Constrói a seção de informações do produto
+  /// Constrói a seção de informações do produto - MIGRADO: CartItemEntity
   Widget _buildProductInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          item.product.name,
+          item.productName, // MIGRADO: usar productName da CartItemEntity
           style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
@@ -101,7 +104,9 @@ class CartItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          currencyFormatter.format(item.product.price),
+          currencyFormatter.format(
+            item.productPrice,
+          ), // MIGRADO: usar productPrice da CartItemEntity
           style: TextStyle(
             color: AppColors.textSecondary,
             fontSize: 11,
@@ -110,7 +115,7 @@ class CartItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 2),
         Text(
-          'Total: ${currencyFormatter.format(item.totalPrice)}',
+          'Total: ${currencyFormatter.format(item.subtotal)}', // MIGRADO: usar subtotal da CartItemEntity
           style: TextStyle(
             color: AppColors.priceColor,
             fontWeight: FontWeight.bold,

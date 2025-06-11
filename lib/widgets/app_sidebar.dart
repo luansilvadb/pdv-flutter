@@ -1,51 +1,40 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
-import '../providers/navigation_provider.dart';
+import '../features/navigation/presentation/providers/navigation_provider.dart';
 
-class AppSidebar extends StatelessWidget {
+class AppSidebar extends ConsumerWidget {
   const AppSidebar({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<NavigationProvider>(
-      builder: (context, navigationProvider, child) {
-        final selectedIndex = navigationProvider.selectedIndex;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final navigationState = ref.watch(navigationProvider);
+    final selectedIndex = navigationState.selectedIndex;
 
-        return Container(
-          width: 200,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceElevated,
-            border: Border(
-              right: BorderSide(color: AppColors.border, width: 1),
-            ),
+    return Container(
+      width: 200,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceElevated,
+        border: Border(right: BorderSide(color: AppColors.border, width: 1)),
+      ),
+      child: Column(
+        children: [
+          // Header simples
+          _buildHeader(context),
+
+          // Divisor
+          Container(
+            height: 1,
+            color: AppColors.border,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
           ),
-          child: Column(
-            children: [
-              // Header simples
-              _buildHeader(context),
 
-              // Divisor
-              Container(
-                height: 1,
-                color: AppColors.border,
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-              ),
+          const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
-
-              // Navigation items
-              Expanded(
-                child: _buildNavigationItems(
-                  context,
-                  navigationProvider,
-                  selectedIndex,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+          // Navigation items
+          Expanded(child: _buildNavigationItems(context, ref, selectedIndex)),
+        ],
+      ),
     );
   }
 
@@ -105,7 +94,7 @@ class AppSidebar extends StatelessWidget {
 
   Widget _buildNavigationItems(
     BuildContext context,
-    NavigationProvider navigationProvider,
+    WidgetRef ref,
     int selectedIndex,
   ) {
     return ListView.builder(
@@ -120,7 +109,7 @@ class AppSidebar extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 4),
           child: _buildNavigationItem(
             context,
-            navigationProvider,
+            ref,
             item,
             icon,
             index,
@@ -133,7 +122,7 @@ class AppSidebar extends StatelessWidget {
 
   Widget _buildNavigationItem(
     BuildContext context,
-    NavigationProvider navigationProvider,
+    WidgetRef ref,
     String title,
     IconData icon,
     int index,
@@ -179,7 +168,7 @@ class AppSidebar extends StatelessWidget {
         ),
       ),
       onPressed: () {
-        navigationProvider.setSelectedIndex(index);
+        ref.read(navigationProvider.notifier).setSelectedIndex(index);
       },
       child: Row(
         children: [

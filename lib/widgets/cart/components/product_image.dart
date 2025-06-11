@@ -1,14 +1,20 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import '../../../models/order.dart';
+import '../../../features/cart/domain/entities/cart_item_entity.dart';
+// import '../../../models/order.dart'; // COMENTADO - Model antigo
 import '../../../constants/app_constants.dart';
 
-/// Componente reutilizável para exibir imagem do produto no carrinho
+/// Componente reutilizável para exibir imagem do produto no carrinho - MIGRADO
+///
+/// Mudanças principais:
+/// - Usa CartItemEntity ao invés de CartItem antigo
+/// - Acessa productImageUrl diretamente da entity
+/// - Mantém funcionalidade e visual idênticos
 ///
 /// Exibe a imagem do produto com fallback para ícone em caso de erro.
 /// Suporta tanto imagens de assets quanto de rede.
 class ProductImage extends StatelessWidget {
-  /// Item do carrinho contendo as informações do produto
-  final CartItem item;
+  /// Item do carrinho contendo as informações do produto - MIGRADO: CartItemEntity
+  final CartItemEntity item;
 
   /// Largura da imagem (padrão: 56)
   final double width;
@@ -54,14 +60,15 @@ class ProductImage extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    return item.product.imageUrl.startsWith('assets/')
+    // MIGRADO: usar productImageUrl da CartItemEntity
+    return item.productImageUrl.startsWith('assets/')
         ? Image.asset(
-          item.product.imageUrl,
+          item.productImageUrl,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
         )
         : Image.network(
-          item.product.imageUrl,
+          item.productImageUrl,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
         );

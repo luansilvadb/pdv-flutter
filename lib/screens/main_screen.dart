@@ -1,45 +1,44 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
-import '../providers/navigation_provider.dart';
+import '../features/navigation/presentation/providers/navigation_provider.dart';
+import '../features/navigation/presentation/providers/navigation_state.dart';
 import '../screens/menu_screen.dart';
 import '../widgets/cart_panel.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<NavigationProvider>(
-      builder: (context, navigationProvider, child) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.background,
-                AppColors.background.withValues(alpha: 0.95),
-                AppColors.surfaceVariant.withValues(alpha: 0.3),
-              ],
-              stops: const [0.0, 0.7, 1.0],
-            ),
-          ),
-          child: Row(
-            children: [
-              // Enhanced Sidebar
-              _buildModernSidebar(navigationProvider),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final navigationState = ref.watch(navigationProvider);
 
-              // Main content
-              Expanded(child: _buildMainContent(navigationProvider)),
-            ],
-          ),
-        );
-      },
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.background,
+            AppColors.background.withValues(alpha: 0.95),
+            AppColors.surfaceVariant.withValues(alpha: 0.3),
+          ],
+          stops: const [0.0, 0.7, 1.0],
+        ),
+      ),
+      child: Row(
+        children: [
+          // Enhanced Sidebar
+          _buildModernSidebar(ref, navigationState),
+
+          // Main content
+          Expanded(child: _buildMainContent(ref, navigationState)),
+        ],
+      ),
     );
   }
 
-  Widget _buildModernSidebar(NavigationProvider navigationProvider) {
+  Widget _buildModernSidebar(WidgetRef ref, NavigationState navigationState) {
     return Container(
       width: AppSizes.sidebarWidth,
       decoration: BoxDecoration(
@@ -89,7 +88,7 @@ class MainScreen extends StatelessWidget {
           ),
 
           // Navigation Items
-          Expanded(child: _buildNavigationItems(navigationProvider)),
+          Expanded(child: _buildNavigationItems(ref, navigationState)),
 
           // Branding Footer
           _buildBrandingFooter(),
@@ -159,7 +158,7 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNavigationItems(NavigationProvider navigationProvider) {
+  Widget _buildNavigationItems(WidgetRef ref, NavigationState navigationState) {
     return ListView(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.paddingMedium,
@@ -169,7 +168,7 @@ class MainScreen extends StatelessWidget {
           AppConstants.navigationItems.asMap().entries.map((entry) {
             final index = entry.key;
             final item = entry.value;
-            final isSelected = navigationProvider.selectedIndex == index;
+            final isSelected = navigationState.selectedIndex == index;
 
             return Container(
               margin: const EdgeInsets.only(bottom: 6),
@@ -209,7 +208,9 @@ class MainScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    navigationProvider.setSelectedIndex(index);
+                    ref
+                        .read(navigationProvider.notifier)
+                        .setSelectedIndex(index);
                   },
                   child: Row(
                     children: [
@@ -318,8 +319,8 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainContent(NavigationProvider navigationProvider) {
-    switch (navigationProvider.selectedIndex) {
+  Widget _buildMainContent(WidgetRef ref, NavigationState navigationState) {
+    switch (navigationState.selectedIndex) {
       case 0:
         return _buildHomeScreen();
       case 1:

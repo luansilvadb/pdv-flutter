@@ -1,19 +1,35 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../constants/app_constants.dart';
-import '../../providers/cart_provider.dart';
+import '../../features/cart/presentation/providers/cart_provider.dart';
+import '../../features/cart/presentation/providers/cart_state.dart';
+import '../../features/cart/domain/entities/cart_entity.dart';
 
-/// Header do painel de carrinho com informações do pedido e botão de limpar
+/// Header do painel de carrinho com informações do pedido e botão de limpar - MIGRADO
+///
+/// Mudanças principais:
+/// - ConsumerWidget ao invés de StatelessWidget
+/// - Aceita CartState e CartEntity ao invés de CartProvider antigo
+/// - Usa CartProvider Riverpod para ações (limpar carrinho)
+/// - Mantém funcionalidade e visual idênticos
 ///
 /// Exibe o título do painel, contador de itens e botão para limpar carrinho
 /// quando há itens presentes.
-class CartHeader extends StatelessWidget {
-  /// Provider do carrinho para acessar informações
-  final CartProvider cartProvider;
+class CartHeader extends ConsumerWidget {
+  /// Estado atual do carrinho
+  final CartState cartState;
 
-  const CartHeader({super.key, required this.cartProvider});
+  /// Carrinho atual (quando carregado)
+  final CartEntity? currentCart;
+
+  const CartHeader({
+    super.key,
+    required this.cartState,
+    required this.currentCart,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingLarge),
       decoration: BoxDecoration(
@@ -34,7 +50,8 @@ class CartHeader extends StatelessWidget {
           _buildCartIcon(),
           const SizedBox(width: AppSizes.paddingMedium),
           Expanded(child: _buildCartInfo()),
-          if (!cartProvider.isEmpty) _buildClearButton(context),
+          if (currentCart != null && currentCart!.isNotEmpty)
+            _buildClearButton(context, ref),
         ],
       ),
     );
@@ -66,8 +83,10 @@ class CartHeader extends StatelessWidget {
     );
   }
 
-  /// Constrói as informações do carrinho (título e contador)
+  /// Constrói as informações do carrinho (título e contador) - MIGRADO
   Widget _buildCartInfo() {
+    final itemCount = currentCart?.itemCount ?? 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -82,7 +101,7 @@ class CartHeader extends StatelessWidget {
         ),
         const SizedBox(height: 2),
         Text(
-          '${cartProvider.itemCount} ${cartProvider.itemCount == 1 ? 'item' : 'itens'}',
+          '$itemCount ${itemCount == 1 ? 'item' : 'itens'}',
           style: TextStyle(
             color: AppColors.textSecondary,
             fontSize: 13,
@@ -93,8 +112,8 @@ class CartHeader extends StatelessWidget {
     );
   }
 
-  /// Constrói o botão para limpar carrinho
-  Widget _buildClearButton(BuildContext context) {
+  /// Constrói o botão para limpar carrinho - MIGRADO: usar Riverpod
+  Widget _buildClearButton(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
@@ -117,7 +136,7 @@ class CartHeader extends StatelessWidget {
             ),
           ),
         ),
-        onPressed: () => _showClearDialog(context),
+        onPressed: () => _showClearDialog(context, ref),
         child: Icon(
           FluentIcons.delete,
           color: AppColors.error,
@@ -127,8 +146,8 @@ class CartHeader extends StatelessWidget {
     );
   }
 
-  /// Exibe diálogo de confirmação para limpar carrinho
-  void _showClearDialog(BuildContext context) {
+  /// Exibe diálogo de confirmação para limpar carrinho - MIGRADO: usar Riverpod
+  void _showClearDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder:
@@ -165,7 +184,8 @@ class CartHeader extends StatelessWidget {
                 ),
                 child: const Text('Limpar Carrinho'),
                 onPressed: () {
-                  cartProvider.clear();
+                  // MIGRADO: Usar CartProvider Riverpod para limpar carrinho
+                  ref.read(cartProvider.notifier).clearCart();
                   Navigator.of(context).pop();
                 },
               ),

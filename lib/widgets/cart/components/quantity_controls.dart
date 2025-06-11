@@ -1,27 +1,30 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import '../../../models/order.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../features/cart/domain/entities/cart_item_entity.dart';
+// import '../../../models/order.dart'; // COMENTADO - Model antigo
 import '../../../constants/app_constants.dart';
-import '../../../providers/cart_provider.dart';
+import '../../../features/cart/presentation/providers/cart_provider.dart';
 
-/// Componente reutilizável para controles de quantidade no carrinho
+/// Componente reutilizável para controles de quantidade no carrinho - MIGRADO
+///
+/// Mudanças principais:
+/// - ConsumerWidget ao invés de StatelessWidget
+/// - Usa CartItemEntity ao invés de CartItem antigo
+/// - Usa CartProvider Riverpod para ações (incrementar/decrementar)
+/// - Acessa productId e quantity diretamente da entity
+/// - Remove dependência do CartProvider antigo
+/// - Mantém funcionalidade e visual idênticos
 ///
 /// Fornece botões para incrementar/decrementar quantidade de itens
 /// com feedback visual apropriado.
-class QuantityControls extends StatelessWidget {
-  /// Item do carrinho a ser controlado
-  final CartItem item;
+class QuantityControls extends ConsumerWidget {
+  /// Item do carrinho a ser controlado - MIGRADO: CartItemEntity
+  final CartItemEntity item;
 
-  /// Provider do carrinho para executar as ações
-  final CartProvider cartProvider;
-
-  const QuantityControls({
-    super.key,
-    required this.item,
-    required this.cartProvider,
-  });
+  const QuantityControls({super.key, required this.item});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -40,13 +43,21 @@ class QuantityControls extends StatelessWidget {
         children: [
           _buildQuantityButton(
             icon: FluentIcons.remove,
-            onPressed: () => cartProvider.decrementQuantity(item.product.id),
+            // MIGRADO: Usar CartProvider Riverpod para decrementar
+            onPressed:
+                () => ref
+                    .read(cartProvider.notifier)
+                    .decrementQuantity(item.productId),
             color: AppColors.error,
           ),
           _buildQuantityDisplay(),
           _buildQuantityButton(
             icon: FluentIcons.add,
-            onPressed: () => cartProvider.incrementQuantity(item.product.id),
+            // MIGRADO: Usar CartProvider Riverpod para incrementar
+            onPressed:
+                () => ref
+                    .read(cartProvider.notifier)
+                    .incrementQuantity(item.productId),
             color: AppColors.primaryAccent,
           ),
         ],
@@ -87,14 +98,14 @@ class QuantityControls extends StatelessWidget {
     );
   }
 
-  /// Constrói o display da quantidade atual
+  /// Constrói o display da quantidade atual - MIGRADO: CartItemEntity
   Widget _buildQuantityDisplay() {
     return Container(
       width: 32,
       height: 32,
       alignment: Alignment.center,
       child: Text(
-        '${item.quantity}',
+        '${item.quantity}', // MIGRADO: usar quantity da CartItemEntity
         style: TextStyle(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.bold,

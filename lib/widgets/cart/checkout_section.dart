@@ -1,27 +1,46 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../constants/app_constants.dart';
-import '../../providers/cart_provider.dart';
+import '../../features/cart/presentation/providers/cart_provider.dart';
+import '../../features/cart/presentation/providers/cart_state.dart';
+import '../../features/cart/domain/entities/cart_entity.dart';
 
-/// Seção de checkout com totais e botão de finalização
+/// Seção de checkout com totais e botão de finalização - MIGRADO
+///
+/// Mudanças principais:
+/// - ConsumerWidget ao invés de StatelessWidget
+/// - Aceita CartState e CartEntity ao invés de CartProvider antigo
+/// - Usa CartProvider Riverpod para ações (limpar carrinho)
+/// - Calcula totais a partir da CartEntity
+/// - Mantém funcionalidade e visual idênticos
 ///
 /// Exibe subtotal, taxa de serviço, total final e botão para
 /// finalizar pedido com diálogo de confirmação.
-class CheckoutSection extends StatelessWidget {
-  /// Provider do carrinho para acessar valores
-  final CartProvider cartProvider;
+class CheckoutSection extends ConsumerWidget {
+  /// Estado atual do carrinho
+  final CartState cartState;
+
+  /// Carrinho atual (quando carregado)
+  final CartEntity currentCart;
 
   /// Formatador de moeda
   final NumberFormat currencyFormatter;
 
   const CheckoutSection({
     super.key,
-    required this.cartProvider,
+    required this.cartState,
+    required this.currentCart,
     required this.currencyFormatter,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // MIGRADO: Calcular totais a partir da CartEntity
+    final subtotal = currentCart.totalAmount;
+    final tax = subtotal * 0.10; // Taxa de serviço 10%
+    final total = subtotal + tax;
+
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingLarge),
       decoration: BoxDecoration(
@@ -46,13 +65,13 @@ class CheckoutSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildTotalRow('Subtotal', cartProvider.subtotal, false),
+          _buildTotalRow('Subtotal', subtotal, false),
           const SizedBox(height: AppSizes.paddingSmall),
-          _buildTotalRow('Taxa de Serviço (10%)', cartProvider.tax, false),
+          _buildTotalRow('Taxa de Serviço (10%)', tax, false),
           _buildDivider(),
-          _buildTotalRow('Total', cartProvider.total, true),
+          _buildTotalRow('Total', total, true),
           const SizedBox(height: AppSizes.paddingLarge),
-          _buildCheckoutButton(context),
+          _buildCheckoutButton(context, ref, total),
         ],
       ),
     );
@@ -102,8 +121,12 @@ class CheckoutSection extends StatelessWidget {
     );
   }
 
-  /// Constrói o botão de finalizar pedido
-  Widget _buildCheckoutButton(BuildContext context) {
+  /// Constrói o botão de finalizar pedido - MIGRADO: usar WidgetRef
+  Widget _buildCheckoutButton(
+    BuildContext context,
+    WidgetRef ref,
+    double total,
+  ) {
     return SizedBox(
       width: double.infinity,
       height: AppSizes.buttonHeight,
@@ -133,7 +156,7 @@ class CheckoutSection extends StatelessWidget {
             return AppElevations.level2;
           }),
         ),
-        onPressed: () => _showCheckoutDialog(context),
+        onPressed: () => _showCheckoutDialog(context, ref, total),
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -168,8 +191,8 @@ class CheckoutSection extends StatelessWidget {
     );
   }
 
-  /// Exibe diálogo de confirmação do pedido
-  void _showCheckoutDialog(BuildContext context) {
+  /// Exibe diálogo de confirmação do pedido - MIGRADO: usar CartEntity
+  void _showCheckoutDialog(BuildContext context, WidgetRef ref, double total) {
     showDialog(
       context: context,
       builder:
@@ -211,7 +234,7 @@ class CheckoutSection extends StatelessWidget {
                       ),
                       const SizedBox(width: AppSizes.paddingSmall),
                       Text(
-                        'Total do pedido: ${currencyFormatter.format(cartProvider.total)}',
+                        'Total do pedido: ${currencyFormatter.format(total)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.priceColor,
@@ -229,7 +252,7 @@ class CheckoutSection extends StatelessWidget {
                       ),
                       const SizedBox(width: AppSizes.paddingSmall),
                       Text(
-                        '${cartProvider.itemCount} ${cartProvider.itemCount == 1 ? 'item' : 'itens'} no carrinho',
+                        '${currentCart.itemCount} ${currentCart.itemCount == 1 ? 'item' : 'itens'} no carrinho',
                         style: TextStyle(color: AppColors.textSecondary),
                       ),
                     ],
@@ -260,16 +283,17 @@ class CheckoutSection extends StatelessWidget {
                     const Text('Confirmar Pedido'),
                   ],
                 ),
-                onPressed: () => _confirmOrder(context),
+                onPressed: () => _confirmOrder(context, ref),
               ),
             ],
           ),
     );
   }
 
-  /// Confirma o pedido e exibe notificação de sucesso
-  void _confirmOrder(BuildContext context) {
-    cartProvider.clear();
+  /// Confirma o pedido e exibe notificação de sucesso - MIGRADO: usar Riverpod
+  void _confirmOrder(BuildContext context, WidgetRef ref) {
+    // MIGRADO: Usar CartProvider Riverpod para limpar carrinho
+    ref.read(cartProvider.notifier).clearCart();
     Navigator.of(context).pop();
     displayInfoBar(
       context,

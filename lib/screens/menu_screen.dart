@@ -1,56 +1,101 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
-import '../providers/product_provider.dart';
+import '../features/products/presentation/providers/products_provider.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/product_card.dart';
 import 'package:intl/intl.dart';
 
-class MenuScreen extends StatelessWidget {
+class MenuScreen extends ConsumerWidget {
   const MenuScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<ProductProvider>(
-      builder: (context, productProvider, child) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.background,
-                AppColors.background.withValues(alpha: 0.95),
-                AppColors.surfaceVariant.withValues(alpha: 0.1),
-              ],
-            ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final products = ref.watch(productsListProvider);
+    final isLoading = ref.watch(isLoadingProductsProvider);
+    final error = ref.watch(productsErrorProvider);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.background,
+            AppColors.background.withValues(alpha: 0.95),
+            AppColors.surfaceVariant.withValues(alpha: 0.1),
+          ],
+        ),
+      ),
+      child: Column(
+        children: [
+          // Enhanced Header
+          _buildEnhancedHeader(context, ref),
+
+          // Enhanced Category Tabs
+          _buildEnhancedCategorySection(),
+
+          // Quick Filters for search
+          _buildQuickFilters(ref),
+
+          // Enhanced Products Grid
+          Expanded(
+            child: _buildContent(context, ref, products, isLoading, error),
           ),
-          child: Column(
-            children: [
-              // Enhanced Header
-              _buildEnhancedHeader(context, productProvider),
-
-              // Enhanced Category Tabs
-              _buildEnhancedCategorySection(),
-
-              // Quick Filters for search
-              _buildQuickFilters(productProvider),
-
-              // Enhanced Products Grid
-              Expanded(
-                child: _buildEnhancedProductsGrid(context, productProvider),
-              ),
-            ],
-          ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  Widget _buildEnhancedHeader(
+  Widget _buildContent(
     BuildContext context,
-    ProductProvider productProvider,
+    WidgetRef ref,
+    List products,
+    bool isLoading,
+    String? error,
   ) {
+    if (isLoading) {
+      return const Center(child: ProgressRing());
+    }
+
+    if (error != null) {
+      return _buildErrorState(error);
+    }
+
+    if (products.isEmpty) {
+      return _buildEnhancedEmptyState(context, ref);
+    }
+
+    return _buildEnhancedProductsGrid(context, ref, products);
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(FluentIcons.error, size: 64, color: AppColors.error),
+          const SizedBox(height: AppSizes.paddingLarge),
+          Text(
+            'Erro ao carregar produtos',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppSizes.paddingMedium),
+          Text(
+            error,
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedHeader(BuildContext context, WidgetRef ref) {
     final now = DateTime.now();
     final dateFormatter = DateFormat('EEEE, d \'de\' MMMM \'de\' y', 'pt_BR');
     final timeFormatter = DateFormat('HH:mm', 'pt_BR');
@@ -208,15 +253,14 @@ class MenuScreen extends StatelessWidget {
           const SizedBox(height: AppSizes.paddingLarge),
 
           // Enhanced Search bar
-          _buildEnhancedSearchBar(productProvider),
+          _buildEnhancedSearchBar(ref),
         ],
       ),
     );
   }
 
-  Widget _buildEnhancedSearchBar(ProductProvider productProvider) {
-    final searchQuery = productProvider.searchQuery;
-    final hasSearchQuery = searchQuery.isNotEmpty;
+  Widget _buildEnhancedSearchBar(WidgetRef ref) {
+    // Funcionalidade de busca será implementada em versões futuras
 
     return Container(
       height: 56,
@@ -231,35 +275,22 @@ class MenuScreen extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
         border: Border.all(
-          color:
-              hasSearchQuery
-                  ? AppColors.primaryAccent.withValues(alpha: 0.4)
-                  : AppColors.border.withValues(alpha: 0.2),
-          width: hasSearchQuery ? 1.5 : 1.0,
+          color: AppColors.border.withValues(alpha: 0.2),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                hasSearchQuery
-                    ? AppColors.primaryAccent.withValues(alpha: 0.1)
-                    : AppColors.shadowLight,
-            blurRadius: hasSearchQuery ? 8 : 6,
+            color: AppColors.shadowLight,
+            blurRadius: 6,
             offset: const Offset(0, 2),
-            spreadRadius: hasSearchQuery ? 0 : -1,
+            spreadRadius: -1,
           ),
-          if (hasSearchQuery)
-            BoxShadow(
-              color: AppColors.primaryAccent.withValues(alpha: 0.05),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-              spreadRadius: 1,
-            ),
         ],
       ),
       child: TextBox(
         placeholder: 'Busque por pratos, bebidas ou categorias...',
         onChanged: (value) {
-          productProvider.setSearchQuery(value);
+          // Busca será implementada em versões futuras
         },
         prefix: AnimatedContainer(
           duration: AppSizes.animationMedium,
@@ -269,40 +300,13 @@ class MenuScreen extends StatelessWidget {
           ),
           child: Icon(
             FluentIcons.search,
-            color:
-                hasSearchQuery
-                    ? AppColors.primaryAccent
-                    : AppColors.textTertiary,
+            color: AppColors.textTertiary,
             size: AppSizes.iconMedium,
           ),
         ),
         suffix: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (hasSearchQuery)
-              AnimatedContainer(
-                duration: AppSizes.animationMedium,
-                margin: const EdgeInsets.only(right: AppSizes.paddingSmall),
-                child: IconButton(
-                  icon: Icon(
-                    FluentIcons.clear,
-                    size: AppSizes.iconSmall,
-                    color: AppColors.textTertiary,
-                  ),
-                  onPressed: () {
-                    productProvider.setSearchQuery('');
-                  },
-                  style: ButtonStyle(
-                    padding: WidgetStateProperty.all(const EdgeInsets.all(6)),
-                    backgroundColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.hovered)) {
-                        return AppColors.surfaceVariant.withValues(alpha: 0.5);
-                      }
-                      return Colors.transparent;
-                    }),
-                  ),
-                ),
-              ),
             Container(
               margin: const EdgeInsets.only(right: AppSizes.paddingMedium),
               padding: const EdgeInsets.symmetric(
@@ -384,14 +388,9 @@ class MenuScreen extends StatelessWidget {
 
   Widget _buildEnhancedProductsGrid(
     BuildContext context,
-    ProductProvider productProvider,
+    WidgetRef ref,
+    List products,
   ) {
-    final filteredProducts = productProvider.filteredProducts;
-
-    if (filteredProducts.isEmpty) {
-      return _buildEnhancedEmptyState(context);
-    }
-
     return Container(
       decoration: BoxDecoration(
         gradient: RadialGradient(
@@ -411,9 +410,9 @@ class MenuScreen extends StatelessWidget {
           crossAxisSpacing: AppSizes.paddingMedium,
           mainAxisSpacing: AppSizes.paddingMedium,
         ),
-        itemCount: filteredProducts.length,
+        itemCount: products.length,
         itemBuilder: (context, index) {
-          final product = filteredProducts[index];
+          final product = products[index];
           return ProductCard(product: product);
         },
       ),
@@ -428,7 +427,7 @@ class MenuScreen extends StatelessWidget {
     return 4; // Desktop large
   }
 
-  Widget _buildEnhancedEmptyState(BuildContext context) {
+  Widget _buildEnhancedEmptyState(BuildContext context, WidgetRef ref) {
     return Center(
       child: SingleChildScrollView(
         child: Container(
@@ -553,8 +552,8 @@ class MenuScreen extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // Limpar busca
-                  context.read<ProductProvider>().setSearchQuery('');
+                  // Carregar todos os produtos
+                  ref.read(productsNotifierProvider.notifier).loadAllProducts();
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -578,133 +577,8 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
-  // Adicionar método para construir filtros rápidos
-  Widget _buildQuickFilters(ProductProvider productProvider) {
-    final searchQuery = productProvider.searchQuery;
-
-    if (searchQuery.isEmpty) return const SizedBox.shrink();
-
-    final quickFilters = [
-      {
-        'label': 'Preço: Menor',
-        'icon': FluentIcons.sort_down,
-        'action': 'price_asc',
-      },
-      {
-        'label': 'Preço: Maior',
-        'icon': FluentIcons.sort_up,
-        'action': 'price_desc',
-      },
-      {
-        'label': 'Mais Populares',
-        'icon': FluentIcons.heart,
-        'action': 'popular',
-      },
-      {'label': 'Mais Recentes', 'icon': FluentIcons.clock, 'action': 'recent'},
-    ];
-
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSizes.paddingLarge,
-        vertical: AppSizes.paddingMedium,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Filtros rápidos para "${searchQuery}"',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-            ),
-          ),
-          const SizedBox(height: AppSizes.paddingSmall),
-          Wrap(
-            spacing: AppSizes.paddingSmall,
-            runSpacing: AppSizes.paddingSmall,
-            children:
-                quickFilters.map((filter) {
-                  return GestureDetector(
-                    onTap: () {
-                      // Implementar ação do filtro
-                      _applyQuickFilter(
-                        filter['action'] as String,
-                        productProvider,
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.paddingMedium,
-                        vertical: AppSizes.paddingSmall,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.surfaceContainer.withValues(alpha: 0.8),
-                            AppColors.surfaceVariant.withValues(alpha: 0.6),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.radiusMedium,
-                        ),
-                        border: Border.all(
-                          color: AppColors.border.withValues(alpha: 0.3),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.shadowLight,
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            filter['icon'] as IconData,
-                            size: AppSizes.iconSmall,
-                            color: AppColors.primaryAccent,
-                          ),
-                          const SizedBox(width: AppSizes.paddingSmall),
-                          Text(
-                            filter['label'] as String,
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _applyQuickFilter(String action, ProductProvider productProvider) {
-    // Implementar lógica de filtros
-    switch (action) {
-      case 'price_asc':
-        // Ordenar por preço crescente
-        break;
-      case 'price_desc':
-        // Ordenar por preço decrescente
-        break;
-      case 'popular':
-        // Mostrar mais populares
-        break;
-      case 'recent':
-        // Mostrar mais recentes
-        break;
-    }
+  Widget _buildQuickFilters(WidgetRef ref) {
+    // Busca será implementada em versões futuras state
+    return const SizedBox.shrink();
   }
 }
