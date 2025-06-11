@@ -46,10 +46,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "app/api/**/*.dart": {
-      "runtime": "@vercel/dart@1.0.0"
-    }
-  }
+  ]
 }
