@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "pubspec.yaml",
+      "use": "@dart-lang/flutter@latest",
+      "config": {
+        "buildCommand": "flutter build web --release --no-tree-shake-icons"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "outputDirectory": "build/web",
+  "installCommand": "flutter packages get",
+  "buildCommand": "flutter build web --release --no-tree-shake-icons",
+  "framework": null,
+  "functions": {},
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
