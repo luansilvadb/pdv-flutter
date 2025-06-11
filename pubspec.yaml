@@ -10,7 +10,7 @@ dependencies:
   # 🎨 UI Framework
   flutter:
     sdk: flutter
-  fluent_ui: ^4.9.1
+  fluent_ui: ^4.8.6
   fluentui_icons: ^1.0.0
   
   # 🔄 State Management
