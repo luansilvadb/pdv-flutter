@@ -1,0 +1,209 @@
+# =============================================================================
+# 🐳 PDV Restaurant - Docker Compose para Produção
+# =============================================================================
+# Autor: PDV Restaurant Team
+# Descrição: Ambiente de produção otimizado com load balancing
+# Uso: docker-compose -f docker-compose.prod.yml up -d
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # 🚀 PDV Restaurant - Aplicação Principal
+  # =============================================================================
+  pdv-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - FLUTTER_WEB_RENDERER=canvaskit
+        - BUILD_MODE=release
+        - BASE_HREF=/
+        - BUILD_DATE=${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        - VCS_REF=${GITHUB_SHA:-local}
+        - VERSION=${VERSION:-2.0.0}
+    image: pdv-restaurant:${VERSION:-latest}
+    container_name: pdv-restaurant-prod
+    ports:
+      - "8080:8080"
+    environment:
+      - NGINX_WORKER_PROCESSES=auto
+      - NGINX_WORKER_CONNECTIONS=1024
+      - NGINX_KEEPALIVE_TIMEOUT=65
+      - NGINX_CLIENT_MAX_BODY_SIZE=10m
+      - TZ=America/Sao_Paulo
+    networks:
+      - pdv-prod-network
+    volumes:
+      # Logs para análise
+      - nginx_logs:/var/log/nginx
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pdv-prod.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.pdv-prod.tls=true"
+      - "traefik.http.services.pdv-prod.loadbalancer.server.port=8080"
+      
+  # =============================================================================
+  # ⚖️ Load Balancer com Traefik (Opcional)
+  # =============================================================================
+  traefik:
+    image: traefik:v3.0
+    container_name: pdv-traefik
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--metrics.prometheus=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8888:8080"  # Dashboard (apenas com auth)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - pdv-prod-network
+    restart: unless-stopped
+    profiles:
+      - "traefik"
+
+  # =============================================================================
+  # 📊 Monitoring com Prometheus (Opcional)
+  # =============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pdv-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - pdv-prod-network
+    restart: unless-stopped
+    profiles:
+      - "monitoring"
+
+  # =============================================================================
+  # 📈 Grafana Dashboard (Opcional)
+  # =============================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pdv-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - pdv-prod-network
+    restart: unless-stopped
+    profiles:
+      - "monitoring"
+
+  # =============================================================================
+  # 🗄️ Redis Cache (Futuro - para sessões/cache)
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: pdv-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - pdv-prod-network
+    restart: unless-stopped
+    profiles:
+      - "cache"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# =============================================================================
+# 🌐 Networks
+# =============================================================================
+networks:
+  pdv-prod-network:
+    name: pdv-prod-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
+# =============================================================================
+# 💾 Volumes Persistentes
+# =============================================================================
+volumes:
+  nginx_logs:
+    name: pdv_nginx_logs
+    driver: local
+    
+  traefik_letsencrypt:
+    name: pdv_traefik_letsencrypt
+    driver: local
+    
+  prometheus_data:
+    name: pdv_prometheus_data
+    driver: local
+    
+  grafana_data:
+    name: pdv_grafana_data
+    driver: local
+    
+  redis_data:
+    name: pdv_redis_data
+    driver: local
+
+# =============================================================================
+# 🔧 Configurações Adicionais
+# =============================================================================
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-restart-policy: &restart-policy
+  restart_policy:
+    condition: unless-stopped
+    delay: 5s
+    max_attempts: 3
+    window: 120s

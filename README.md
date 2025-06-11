@@ -8,7 +8,7 @@ Sistema PDV moderno para restaurantes desenvolvido em Flutter Web com arquitetur
 - **Dart** - Linguagem de programação
 - **Riverpod** - Gerenciamento de estado
 - **Clean Architecture** - Padrão arquitetural
-- **Vercel** - Deploy e hosting
+
 
 ## 📱 Características
 
@@ -41,18 +41,23 @@ flutter build web --release
 
 ## 🌐 Deploy
 
-Este projeto está configurado para deploy automático no Vercel:
+Para fazer deploy do projeto:
 
-1. **Detecção automática** - Vercel detecta como Flutter Web
-2. **Build automático** - Executa `flutter build web` automaticamente
-3. **Deploy contínuo** - Deploy automático a cada push no GitHub
 
-### Configuração Vercel
 
-- **Framework**: Flutter Web (auto-detectado)
-- **Output Directory**: `build/web`
-- **Install Command**: `flutter pub get`
-- **Build Command**: `flutter build web --release --tree-shake-icons --source-maps --base-href /`
+
+
+
+
+
+
+
+```bash
+# Build para produção
+flutter build web --release --tree-shake-icons --source-maps
+
+# O diretório build/web contém os arquivos para deploy
+```
 
 ## 📁 Estrutura do Projeto
 

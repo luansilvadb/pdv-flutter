@@ -1,0 +1,329 @@
+# =============================================================================
+# 🚀 PDV Restaurant - GitHub Actions CI/CD Pipeline
+# =============================================================================
+# Autor: PDV Restaurant Team
+# Descrição: Build e deploy automático para Docker Hub
+# Triggers: Push para main, tags, pull requests
+# =============================================================================
+
+name: 🐳 Docker Build & Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+# =============================================================================
+# 🌍 Environment Variables
+# =============================================================================
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: ${{ github.repository }}
+  FLUTTER_VERSION: 3.24.5
+
+# =============================================================================
+# 🔧 Jobs
+# =============================================================================
+jobs:
+  # =============================================================================
+  # 🧪 Testes e Análise de Código
+  # =============================================================================
+  test:
+    name: 🧪 Tests & Code Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: flutter-${{ env.FLUTTER_VERSION }}
+
+      - name: 📦 Get dependencies
+        run: flutter pub get
+
+      - name: 🔍 Verify Flutter installation
+        run: flutter doctor -v
+
+      - name: 📊 Run code analysis
+        run: |
+          flutter analyze --fatal-infos
+          
+      - name: 🧪 Run tests
+        run: |
+          flutter test --coverage --reporter=json > test-results.json
+          
+      - name: 📈 Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            test-results.json
+            coverage/
+          retention-days: 30
+
+      - name: 📊 Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          file: coverage/lcov.info
+          fail_ci_if_error: false
+
+  # =============================================================================
+  # 🏗️ Build Docker Image
+  # =============================================================================
+  build:
+    name: 🏗️ Build Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    timeout-minutes: 30
+    
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+      
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: 🐳 Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 🏷️ Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix={{branch}}-
+          labels: |
+            org.opencontainers.image.title=PDV Restaurant
+            org.opencontainers.image.description=Sistema PDV moderno para restaurantes
+            org.opencontainers.image.vendor=PDV Restaurant Team
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.documentation=${{ github.server_url }}/${{ github.repository }}/blob/main/DOCKER_README.md
+            org.opencontainers.image.licenses=MIT
+
+      - name: 🏗️ Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            FLUTTER_WEB_RENDERER=canvaskit
+            BUILD_MODE=release
+            BASE_HREF=/
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+
+      - name: 🔍 Run Trivy vulnerability scanner
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 📊 Upload Trivy scan results
+        if: github.event_name != 'pull_request'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # =============================================================================
+  # 🧪 Smoke Tests
+  # =============================================================================
+  smoke-test:
+    name: 🧪 Smoke Tests
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name != 'pull_request'
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 🚀 Run container for testing
+        run: |
+          docker run -d --name pdv-test \
+            -p 8080:8080 \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          
+          # Wait for container to be ready
+          sleep 30
+          
+          # Health check
+          curl -f http://localhost:8080/health || exit 1
+          
+          # Basic app check
+          curl -f http://localhost:8080/ || exit 1
+          
+          echo "✅ Smoke tests passed!"
+
+      - name: 🧹 Cleanup test container
+        if: always()
+        run: |
+          docker stop pdv-test || true
+          docker rm pdv-test || true
+
+  # =============================================================================
+  # 🚀 Deploy
+  # =============================================================================
+  deploy:
+    name: 🚀 Deploy
+    runs-on: ubuntu-latest
+    needs: [build, smoke-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: 
+      name: production
+      url: https://pdv-restaurant.com
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to production
+        run: |
+          echo "🚀 Deploying to production..."
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          # Aqui você pode adicionar scripts de deploy real
+          # Por exemplo: kubectl, docker-compose, etc.
+
+      - name: 📣 Notify deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: |
+            🚀 PDV Restaurant deployment ${{ job.status }}!
+            Version: ${{ github.sha }}
+            Environment: Production
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # =============================================================================
+  # 🧹 Cleanup
+  # =============================================================================
+  cleanup:
+    name: 🧹 Cleanup old images
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: always() && github.ref == 'refs/heads/main'
+    timeout-minutes: 5
+    
+    steps:
+      - name: 🐳 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 🧹 Delete old images
+        run: |
+          echo "🧹 Cleaning up old Docker images..."
+          # Manter apenas as últimas 10 imagens
+          # Implementar lógica de cleanup se necessário
+
+# =============================================================================
+# 🔔 Notificações
+# =============================================================================
+  notify:
+    name: 🔔 Notify Status
+    runs-on: ubuntu-latest
+    needs: [test, build, smoke-test, deploy]
+    if: always()
+    
+    steps:
+      - name: 📣 Send notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "text": "🐳 PDV Restaurant CI/CD Pipeline",
+              "attachments": [
+                {
+                  "color": "${{ contains(needs.*.result, 'failure') && 'danger' || 'good' }}",
+                  "fields": [
+                    {
+                      "title": "Repository",
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "${{ github.ref_name }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Commit",
+                      "value": "${{ github.sha }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Status",
+                      "value": "${{ contains(needs.*.result, 'failure') && '❌ Failed' || '✅ Success' }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

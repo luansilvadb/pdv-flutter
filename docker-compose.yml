@@ -1,0 +1,116 @@
+# =============================================================================
+# 🐳 PDV Restaurant - Docker Compose para Desenvolvimento
+# =============================================================================
+# Autor: PDV Restaurant Team
+# Descrição: Ambiente de desenvolvimento com hot reload
+# Uso: docker-compose up -d
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # 🚀 Flutter Web Development Server
+  # =============================================================================
+  pdv-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - FLUTTER_VERSION=3.24.5
+        - BUILD_MODE=debug
+    container_name: pdv-restaurant-dev
+    ports:
+      - "3000:3000"    # Flutter Web Dev Server
+      - "9999:9999"    # Debug port
+    volumes:
+      # Hot reload - código fonte
+      - ./lib:/app/lib:delegated
+      - ./web:/app/web:delegated
+      - ./assets:/app/assets:delegated
+      - ./pubspec.yaml:/app/pubspec.yaml:delegated
+      
+      # Cache volumes para performance
+      - flutter_pub_cache:/opt/flutter/.pub-cache
+      - dart_tool_cache:/app/.dart_tool
+    environment:
+      - FLUTTER_ENV=development
+      - FLUTTER_WEB_RENDERER=html
+      - FLUTTER_WEB_PORT=3000
+      - FLUTTER_WEB_HOSTNAME=0.0.0.0
+      - FLUTTER_HOT_RELOAD=true
+    networks:
+      - pdv-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pdv-dev.rule=Host(`localhost`)"
+      - "traefik.http.services.pdv-dev.loadbalancer.server.port=3000"
+
+  # =============================================================================
+  # 🔧 Nginx Proxy para Desenvolvimento (Opcional)
+  # =============================================================================
+  nginx-dev:
+    image: nginx:1.25-alpine
+    container_name: pdv-nginx-dev
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - pdv-dev
+    networks:
+      - pdv-network
+    restart: unless-stopped
+    profiles:
+      - "with-nginx"
+
+  # =============================================================================
+  # 📊 Monitoring & Logs (Opcional)
+  # =============================================================================
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: pdv-portainer
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - pdv-network
+    restart: unless-stopped
+    profiles:
+      - "monitoring"
+
+# =============================================================================
+# 🌐 Networks
+# =============================================================================
+networks:
+  pdv-network:
+    name: pdv-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# =============================================================================
+# 💾 Volumes
+# =============================================================================
+volumes:
+  flutter_pub_cache:
+    name: pdv_flutter_pub_cache
+    driver: local
+  
+  dart_tool_cache:
+    name: pdv_dart_tool_cache
+    driver: local
+    
+  portainer_data:
+    name: pdv_portainer_data
+    driver: local
