@@ -324,7 +324,7 @@ Após executar o aplicativo com sucesso:
 
 1. [Entender a Estrutura do Projeto](./understanding-structure)
 2. [Uso Básico do Sistema](./basic-usage)
-3. [Explorar Funcionalidades](../features/features)
+3. [Explorar Funcionalidades](../features)
 
 ## 🔗 Links Úteis
 
