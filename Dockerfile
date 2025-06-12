@@ -40,9 +40,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Download e instalação do Flutter (versão específica)
-RUN curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
-    | tar -xJ -C /opt/
+# Download e instalação do Flutter (versão específica) - Detecta arquitetura automaticamente
+RUN ARCH=$(uname -m) && \
+    echo "Detected architecture: $ARCH" && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        FLUTTER_ARCH=""; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        FLUTTER_ARCH="_arm64"; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
+    FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux${FLUTTER_ARCH}_${FLUTTER_VERSION}-stable.tar.xz" && \
+    echo "Downloading Flutter from: $FLUTTER_URL" && \
+    curl -fsSL "$FLUTTER_URL" | tar -xJ -C /opt/
 
 # Configurar Git safe directory antes dos comandos Flutter
 RUN git config --global --add safe.directory /opt/flutter
