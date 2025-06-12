@@ -17,7 +17,7 @@ LABEL description="Flutter Web build environment"
 LABEL version="2.0.0"
 
 # Definir variáveis de ambiente para Flutter
-ENV FLUTTER_VERSION=3.24.5
+ENV FLUTTER_VERSION=3.32.3
 ENV FLUTTER_HOME=/opt/flutter
 ENV PATH="$FLUTTER_HOME/bin:$PATH"
 ENV PUB_CACHE=/opt/flutter/.pub-cache

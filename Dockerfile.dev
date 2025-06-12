@@ -14,7 +14,7 @@ LABEL description="Flutter Web development environment with hot reload"
 LABEL version="2.0.0-dev"
 
 # Definir variáveis de ambiente para Flutter
-ARG FLUTTER_VERSION=3.24.5
+ARG FLUTTER_VERSION=3.32.3
 ENV FLUTTER_VERSION=$FLUTTER_VERSION
 ENV FLUTTER_HOME=/opt/flutter
 ENV PATH="$FLUTTER_HOME/bin:$PATH"

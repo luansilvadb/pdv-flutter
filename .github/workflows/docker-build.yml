@@ -31,7 +31,7 @@ on:
 env:
   REGISTRY: docker.io
   IMAGE_NAME: ${{ github.repository }}
-  FLUTTER_VERSION: 3.24.5
+  FLUTTER_VERSION: 3.32.3
 
 # =============================================================================
 # 🔧 Jobs
