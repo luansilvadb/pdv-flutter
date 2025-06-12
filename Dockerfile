@@ -33,6 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
     unzip \
+    xz-utils \
     ca-certificates \
     fonts-liberation \
     libglu1-mesa \
