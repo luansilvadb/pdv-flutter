@@ -1,77 +1,57 @@
-# =============================================================================
-# 🐳 PDV Restaurant - Dockerfile MVP Simplificado
-# =============================================================================
-# Solução para problema ARM64 - Flutter 3.22.2 universalmente compatível
-# =============================================================================
+# ===================================================================
+# Dockerfile MVP Ultra-Simplificado - Flutter Web Estático
+# ===================================================================
+# 
+# ✅ SOLUÇÃO ARM64: Usa apenas nginx:alpine (suporte nativo ARM64)
+# ✅ SEM Flutter SDK: Elimina problema de compatibilidade binária
+# ✅ ARQUIVOS ESTÁTICOS: Serve build/web pré-compilado
+# ✅ COMPATÍVEL: EasyPanel, Docker ARM64/x64, todos os hosts
+#
+# 📋 PRÉ-REQUISITOS:
+# - Build Flutter deve ser feito LOCALMENTE: flutter build web
+# - Pasta build/web deve existir no projeto
+#
+# 🚀 USO:
+# docker build -t pdv-restaurant .
+# docker run -p 80:80 pdv-restaurant
+#
+# ===================================================================
 
-# -----------------------------------------------------------------------------
-# 🏗️ STAGE 1: Flutter Build Environment
-# -----------------------------------------------------------------------------
-FROM debian:bookworm-slim AS flutter-builder
+FROM nginx:alpine
 
-# Versão do Flutter universalmente compatível
-ENV FLUTTER_VERSION=3.22.2
-ENV FLUTTER_HOME=/opt/flutter
-ENV PATH="$FLUTTER_HOME/bin:$PATH"
+# Metadados da imagem
+LABEL maintainer="PDV Restaurant Team"
+LABEL version="1.0.0-mvp"
+LABEL description="Flutter Web estático via nginx:alpine - ARM64 compatível"
 
-# Instalar dependências básicas
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    git \
-    unzip \
-    xz-utils \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Remove configuração padrão do nginx
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Download do Flutter (sempre x86_64 - funciona via emulação em ARM64)
-RUN ARCH=$(uname -m) && \
-    echo "Arquitetura detectada: $ARCH" && \
-    echo "Usando Flutter x86_64 (compatível com todas as arquiteturas via emulação)" && \
-    FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" && \
-    echo "Baixando Flutter de: $FLUTTER_URL" && \
-    curl -fsSL "$FLUTTER_URL" | tar -xJ -C /opt/
+# Copia configuração otimizada para Flutter Web
+COPY nginx-flutter.conf /etc/nginx/conf.d/
 
-# Configurar Flutter
-RUN git config --global --add safe.directory /opt/flutter && \
-    flutter config --no-analytics && \
-    flutter config --enable-web && \
-    flutter precache --web
+# Copia arquivos estáticos do build Flutter Web
+COPY build/web/ /usr/share/nginx/html/
 
-# Configurar diretório de trabalho
-WORKDIR /app
+# Define permissões corretas
+RUN chown -R nginx:nginx /usr/share/nginx/html/ && \
+    chmod -R 755 /usr/share/nginx/html/
 
-# Copiar pubspec.yaml primeiro (para cache do Docker)
-COPY pubspec.yaml ./
+# Expõe porta 80
+EXPOSE 80
 
-# Instalar dependências
-RUN flutter pub get
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
 
-# Copiar código fonte
-COPY . .
-
-# Build da aplicação Flutter Web
-RUN flutter build web \
-    --release \
-    --web-renderer=canvaskit \
-    && echo "Build concluído com sucesso!"
-
-# -----------------------------------------------------------------------------
-# 🌐 STAGE 2: Nginx Production Server
-# -----------------------------------------------------------------------------
-FROM nginx:1.25-alpine AS production
-
-# Copiar configuração do Nginx
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Copiar build do Flutter
-COPY --from=flutter-builder /app/build/web /usr/share/nginx/html
-
-# Health check básico
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
-
-# Expor porta
-EXPOSE 8080
-
-# Comando padrão
+# Comando de inicialização
 CMD ["nginx", "-g", "daemon off;"]
+
+# ===================================================================
+# 📊 INFORMAÇÕES DO BUILD:
+# - Imagem base: nginx:alpine (~5MB)
+# - Suporte ARM64: ✅ Nativo
+# - Suporte x64: ✅ Nativo  
+# - Build time: ~30 segundos
+# - Runtime: <50MB total
+# ===================================================================
