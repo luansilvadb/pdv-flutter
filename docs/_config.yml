@@ -1,0 +1,121 @@
+# Site settings
+title: PDV Restaurant
+description: Sistema de Ponto de Venda Moderno para Restaurantes - Documentação Oficial
+baseurl: "/pdv-flutter"
+url: "https://luansilvadb.github.io"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Navigation
+header_pages:
+  - index.md
+  - getting-started.md
+  - architecture.md
+  - features.md
+  - api-reference.md
+  - guides.md
+  - changelog.md
+
+# Collections
+collections:
+  versions:
+    output: true
+    permalink: /versions/:name/
+  guides:
+    output: true
+    permalink: /guides/:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+  - scope:
+      path: ""
+      type: "versions"
+    values:
+      layout: "version"
+  - scope:
+      path: ""
+      type: "guides"
+    values:
+      layout: "guide"
+
+# Version settings
+current_version: "2.0.0"
+latest_version: "2.0.0"
+versions:
+  - version: "2.0.0"
+    status: "stable"
+    release_date: "2025-06-12"
+    description: "Versão atual com interface moderna e arquitetura Clean"
+    features:
+      - "Interface moderna com Fluent UI"
+      - "Catálogo de produtos completo"
+      - "Carrinho de compras funcional"
+      - "Arquitetura Clean implementada"
+  - version: "2.1.0"
+    status: "development"
+    release_date: "2025-Q1"
+    description: "Processamento de vendas e histórico"
+    features:
+      - "Finalização de pedidos"
+      - "Métodos de pagamento"
+      - "Histórico de vendas"
+      - "Impressão de cupons"
+  - version: "2.2.0"
+    status: "planned"
+    release_date: "2025-Q2"
+    description: "Gestão avançada e analytics"
+    features:
+      - "Relatórios detalhados"
+      - "Dashboard gerencial"
+      - "Sistema de promoções"
+      - "Analytics avançados"
+
+# Project info
+github_repo: "luansilvadb/pdv-flutter"
+project_name: "PDV Restaurant"
+project_tagline: "Sistema de Ponto de Venda Moderno"
+
+# Social links
+github_username: luansilvadb
+linkedin_username: luansilvadb
+
+# SEO
+author: Luan Silva
+twitter:
+  username: luansilvadb
+  card: summary_large_image
+
+# Google Analytics (opcional)
+# google_analytics: UA-XXXXXXXX-X
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - README.md
+  - LICENSE
+  - CHANGELOG.md
+  - CONTRIBUTING.md
