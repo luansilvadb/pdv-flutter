@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../features/cart/domain/entities/cart_item_entity.dart';
-import '../../../constants/app_constants.dart';
+import '../../../core/constants/app_constants.dart';
 import 'product_image.dart';
 import 'quantity_controls.dart';
 

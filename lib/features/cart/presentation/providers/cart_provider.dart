@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 
 import '../../../../core/services/dependency_injection.dart';
+import '../../../../shared/domain/value_objects/quantity.dart';
+import '../../../../shared/domain/value_objects/money.dart';
 import '../../domain/entities/cart_entity.dart';
 import '../../domain/usecases/add_to_cart.dart';
 import '../../domain/usecases/remove_from_cart.dart';
@@ -75,17 +77,29 @@ class CartNotifier extends StateNotifier<CartState> {
       },
     );
   }
-
   /// Adiciona produto ao carrinho
-  Future<void> addProduct(String productId, {int quantity = 1}) async {
+  Future<void> addProduct({
+    required String productId,
+    required String productName,
+    required Money price,
+    required String productImageUrl,
+    Quantity? quantity,
+  }) async {
+    final qty = quantity ?? Quantity.one;
     _logger.d(
-      'Adicionando produto $productId ao carrinho (quantidade: $quantity)',
+      'Adicionando produto $productId ao carrinho (quantidade: ${qty.value})',
     );
 
     final previousState = state;
     state = CartItemAdding(productId);
 
-    final params = AddToCartParams(productId: productId, quantity: quantity);
+    final params = AddToCartParams(
+      productId: productId,
+      productName: productName,
+      price: price,
+      productImageUrl: productImageUrl,
+      quantity: qty,
+    );
     final result = await _addToCart(params);
 
     result.fold(
@@ -124,10 +138,9 @@ class CartNotifier extends StateNotifier<CartState> {
       },
     );
   }
-
   /// Atualiza quantidade de um produto
-  Future<void> updateQuantity(String productId, int quantity) async {
-    _logger.d('Atualizando quantidade do produto $productId para $quantity');
+  Future<void> updateQuantity(String productId, Quantity quantity) async {
+    _logger.d('Atualizando quantidade do produto $productId para ${quantity.value}');
 
     final previousState = state;
     state = CartItemUpdating(productId, quantity);
@@ -150,12 +163,12 @@ class CartNotifier extends StateNotifier<CartState> {
       },
     );
   }
-
   /// Incrementa quantidade em 1
   Future<void> incrementQuantity(String productId) async {
     final currentItem = currentCart?.findItemByProductId(productId);
     if (currentItem != null) {
-      await updateQuantity(productId, currentItem.quantity + 1);
+      final newQuantity = Quantity(currentItem.quantity.value + 1);
+      await updateQuantity(productId, newQuantity);
     }
   }
 
@@ -163,11 +176,11 @@ class CartNotifier extends StateNotifier<CartState> {
   Future<void> decrementQuantity(String productId) async {
     final currentItem = currentCart?.findItemByProductId(productId);
     if (currentItem != null) {
-      final newQuantity = currentItem.quantity - 1;
-      if (newQuantity <= 0) {
+      final newQuantityValue = currentItem.quantity.value - 1;
+      if (newQuantityValue <= 0) {
         await removeProduct(productId);
       } else {
-        await updateQuantity(productId, newQuantity);
+        await updateQuantity(productId, Quantity(newQuantityValue));
       }
     }
   }
@@ -200,10 +213,9 @@ class CartNotifier extends StateNotifier<CartState> {
   bool containsProduct(String productId) {
     return currentCart?.containsProduct(productId) ?? false;
   }
-
   /// Obtém quantidade de um produto específico
   int getProductQuantity(String productId) {
-    return currentCart?.findItemByProductId(productId)?.quantity ?? 0;
+    return currentCart?.findItemByProductId(productId)?.quantity.value ?? 0;
   }
 
   /// Recarrega o carrinho

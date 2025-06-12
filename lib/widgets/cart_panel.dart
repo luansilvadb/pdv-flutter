@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:provider/provider.dart'; // COMENTADO - Provider antigo
 import 'package:intl/intl.dart';
-import '../constants/app_constants.dart';
+import '../core/constants/app_constants.dart';
 import '../features/cart/presentation/providers/cart_provider.dart';
 import '../features/cart/presentation/providers/cart_state.dart';
 import 'cart/cart_header.dart';

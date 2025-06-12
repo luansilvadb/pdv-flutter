@@ -1,3 +1,6 @@
+import 'package:logger/logger.dart';
+import 'environment.dart';
+
 /// Configurações globais da aplicação
 class AppConfig {
   // Ambiente
@@ -5,7 +8,21 @@ class AppConfig {
     'DEBUG',
     defaultValue: true,
   );
-  static const bool isProduction = !isDevelopment;
+  static const bool isStaging = bool.fromEnvironment(
+    'STAGING',
+    defaultValue: false,
+  );
+  static const bool isProduction = !isDevelopment && !isStaging;
+
+  // Getter para Environment
+  static Environment get environment => EnvironmentConfig.current;
+
+  // Configurações de logging
+  static Level get logLevel {
+    if (isProduction) return Level.warning;
+    if (isStaging) return Level.info;
+    return Level.debug;
+  }
 
   // Configurações de API (futuro)
   static const String apiBaseUrl = String.fromEnvironment(
@@ -57,21 +74,15 @@ class AppConfig {
   static const int maxOrderHistoryItems = 1000;
   static const int maxSearchResults = 100;
   static const Duration searchDebounce = Duration(milliseconds: 300);
-}
 
-/// Configurações específicas do ambiente
-class EnvironmentConfig {
-  static String get environment {
-    if (AppConfig.isDevelopment) return 'development';
+  // Configurações específicas do ambiente
+  static String get environmentName {
+    if (isDevelopment) return 'development';
+    if (isStaging) return 'staging';
     return 'production';
   }
 
-  static String get logLevel {
-    if (AppConfig.isDevelopment) return 'debug';
-    return 'warning';
-  }
-
-  static bool get enableDetailedLogs => AppConfig.isDevelopment;
-  static bool get enableNetworkLogs => AppConfig.isDevelopment;
+  static bool get enableDetailedLogs => isDevelopment;
+  static bool get enableNetworkLogs => isDevelopment;
   static bool get enablePerformanceMonitoring => true;
 }

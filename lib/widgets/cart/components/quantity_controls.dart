@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/cart/domain/entities/cart_item_entity.dart';
 // import '../../../models/order.dart'; // COMENTADO - Model antigo
-import '../../../constants/app_constants.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../features/cart/presentation/providers/cart_provider.dart';
 
 /// Componente reutilizável para controles de quantidade no carrinho - MIGRADO

@@ -1,4 +1,6 @@
+import 'package:dartz/dartz.dart';
 import '../../../../core/utils/typedef.dart';
+import '../../../../core/errors/failures.dart';
 import '../entities/product_entity.dart';
 
 /// Interface abstrata para operações de produto
@@ -27,4 +29,46 @@ abstract class ProductRepository {
   /// [productId] - ID do produto a ser verificado
   /// Retorna [Either<Failure, bool>]
   FutureEither<bool> isProductAvailable(String productId);
+
+  /// ====== NOVOS MÉTODOS DA ARQUITETURA APRIMORADA ======
+
+  /// Busca produtos por nome ou descrição
+  /// [query] - Termo de busca
+  /// Retorna [Either<Failure, List<ProductEntity>>]
+  Future<Either<Failure, List<ProductEntity>>> searchProducts(String query);
+
+  /// Busca produtos com preço dentro de um range
+  /// [minPrice] - Preço mínimo
+  /// [maxPrice] - Preço máximo
+  /// Retorna [Either<Failure, List<ProductEntity>>]
+  Future<Either<Failure, List<ProductEntity>>> getProductsByPriceRange(
+    double minPrice,
+    double maxPrice,
+  );
+
+  /// Busca produtos disponíveis (com estoque)
+  /// Retorna [Either<Failure, List<ProductEntity>>]
+  Future<Either<Failure, List<ProductEntity>>> getAvailableProducts();
+
+  /// Busca produtos em promoção ou com desconto
+  /// Retorna [Either<Failure, List<ProductEntity>>]
+  Future<Either<Failure, List<ProductEntity>>> getPromotionalProducts();
+
+  /// Atualiza a quantidade disponível de um produto
+  /// [productId] - ID do produto
+  /// [quantity] - Nova quantidade
+  /// Retorna [Either<Failure, void>]
+  Future<Either<Failure, void>> updateProductQuantity(
+    String productId,
+    int quantity,
+  );
+
+  /// Decrementa a quantidade de um produto (para vendas)
+  /// [productId] - ID do produto
+  /// [quantity] - Quantidade a decrementar
+  /// Retorna [Either<Failure, void>]
+  Future<Either<Failure, void>> decrementProductQuantity(
+    String productId,
+    int quantity,
+  );
 }

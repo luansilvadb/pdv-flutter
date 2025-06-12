@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import '../../../features/cart/domain/entities/cart_item_entity.dart';
 // import '../../../models/order.dart'; // COMENTADO - Model antigo
-import '../../../constants/app_constants.dart';
+import '../../../core/constants/app_constants.dart';
 
 /// Componente reutilizável para exibir imagem do produto no carrinho - MIGRADO
 ///

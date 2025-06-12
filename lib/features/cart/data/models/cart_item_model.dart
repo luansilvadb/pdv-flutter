@@ -1,14 +1,24 @@
 import '../../domain/entities/cart_item_entity.dart';
+import '../../../../shared/domain/value_objects/money.dart';
+import '../../../../shared/domain/value_objects/quantity.dart';
 
 /// Model que representa um item do carrinho com serialização JSON
-class CartItemModel extends CartItemEntity {
+/// Usa composição em vez de herança para manter separação das camadas
+class CartItemModel {
+  final String id;
+  final String productId;
+  final String productName;
+  final Money price;
+  final String productImageUrl;
+  final Quantity quantity;
+
   const CartItemModel({
-    required super.id,
-    required super.productId,
-    required super.productName,
-    required super.productPrice,
-    required super.productImageUrl,
-    required super.quantity,
+    required this.id,
+    required this.productId,
+    required this.productName,
+    required this.price,
+    required this.productImageUrl,
+    required this.quantity,
   });
 
   /// Factory constructor para criar a partir de JSON
@@ -17,9 +27,9 @@ class CartItemModel extends CartItemEntity {
       id: json['id'] as String,
       productId: json['productId'] as String,
       productName: json['productName'] as String,
-      productPrice: (json['productPrice'] as num).toDouble(),
+      price: Money((json['productPrice'] as num).toDouble()),
       productImageUrl: json['productImageUrl'] as String,
-      quantity: json['quantity'] as int,
+      quantity: Quantity(json['quantity'] as int),
     );
   }
 
@@ -29,9 +39,9 @@ class CartItemModel extends CartItemEntity {
       'id': id,
       'productId': productId,
       'productName': productName,
-      'productPrice': productPrice,
+      'productPrice': price.value,
       'productImageUrl': productImageUrl,
-      'quantity': quantity,
+      'quantity': quantity.value,
       'subtotal': subtotal,
     };
   }
@@ -42,7 +52,7 @@ class CartItemModel extends CartItemEntity {
       id: entity.id,
       productId: entity.productId,
       productName: entity.productName,
-      productPrice: entity.productPrice,
+      price: entity.price,
       productImageUrl: entity.productImageUrl,
       quantity: entity.quantity,
     );
@@ -54,27 +64,31 @@ class CartItemModel extends CartItemEntity {
       id: id,
       productId: productId,
       productName: productName,
-      productPrice: productPrice,
+      price: price,
       productImageUrl: productImageUrl,
       quantity: quantity,
     );
   }
 
+  /// Propriedades calculadas para compatibilidade
+  Money get totalPrice => Money(price.value * quantity.value);
+  double get productPrice => price.value;
+  double get subtotal => totalPrice.value;
+
   /// Cria uma cópia com novos valores
-  @override
   CartItemModel copyWith({
     String? id,
     String? productId,
     String? productName,
-    double? productPrice,
+    Money? price,
     String? productImageUrl,
-    int? quantity,
+    Quantity? quantity,
   }) {
     return CartItemModel(
       id: id ?? this.id,
       productId: productId ?? this.productId,
       productName: productName ?? this.productName,
-      productPrice: productPrice ?? this.productPrice,
+      price: price ?? this.price,
       productImageUrl: productImageUrl ?? this.productImageUrl,
       quantity: quantity ?? this.quantity,
     );
@@ -83,6 +97,30 @@ class CartItemModel extends CartItemEntity {
   @override
   String toString() {
     return 'CartItemModel(id: $id, productId: $productId, productName: $productName, '
-        'productPrice: $productPrice, quantity: $quantity, subtotal: $subtotal)';
+        'price: ${price.formatted}, quantity: ${quantity.value}, subtotal: $subtotal)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is CartItemModel &&
+        other.id == id &&
+        other.productId == productId &&
+        other.productName == productName &&
+        other.price == price &&
+        other.productImageUrl == productImageUrl &&
+        other.quantity == quantity;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      id,
+      productId,
+      productName,
+      price,
+      productImageUrl,
+      quantity,
+    );
   }
 }

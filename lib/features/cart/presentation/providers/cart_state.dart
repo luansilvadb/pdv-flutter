@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../shared/domain/value_objects/quantity.dart';
 import '../../domain/entities/cart_entity.dart';
 
 /// Estados base para o carrinho
@@ -74,7 +75,7 @@ class CartItemRemoving extends CartState {
 /// Estado específico para operações de atualizar quantidade
 class CartItemUpdating extends CartState {
   final String productId;
-  final int newQuantity;
+  final Quantity newQuantity;
 
   const CartItemUpdating(this.productId, this.newQuantity);
 
@@ -83,7 +84,7 @@ class CartItemUpdating extends CartState {
 
   @override
   String toString() =>
-      'CartItemUpdating(productId: $productId, newQuantity: $newQuantity)';
+      'CartItemUpdating(productId: $productId, newQuantity: ${newQuantity.value})';
 }
 
 /// Estado de limpeza do carrinho

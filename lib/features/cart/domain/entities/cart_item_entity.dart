@@ -1,38 +1,47 @@
 import 'package:equatable/equatable.dart';
+import '../../../../shared/domain/value_objects/quantity.dart';
+import '../../../../shared/domain/value_objects/money.dart';
 
 /// Entity que representa um item no carrinho de compras
 class CartItemEntity extends Equatable {
   final String id;
   final String productId;
   final String productName;
-  final double productPrice;
+  final Money price;
   final String productImageUrl;
-  final int quantity;
-  final double subtotal;
+  final Quantity quantity;
 
   const CartItemEntity({
     required this.id,
     required this.productId,
     required this.productName,
-    required this.productPrice,
+    required this.price,
     required this.productImageUrl,
     required this.quantity,
-  }) : subtotal = productPrice * quantity;
+  });
 
+  /// Preço total do item (preço unitário * quantidade)
+  Money get totalPrice => Money(price.value * quantity.value);
+
+  /// Getter para compatibilidade com código antigo
+  double get productPrice => price.value;
+
+  /// Getter para compatibilidade com código antigo
+  double get subtotal => totalPrice.value;
   /// Cria uma cópia com novos valores
   CartItemEntity copyWith({
     String? id,
     String? productId,
     String? productName,
-    double? productPrice,
+    Money? price,
     String? productImageUrl,
-    int? quantity,
+    Quantity? quantity,
   }) {
     return CartItemEntity(
       id: id ?? this.id,
       productId: productId ?? this.productId,
       productName: productName ?? this.productName,
-      productPrice: productPrice ?? this.productPrice,
+      price: price ?? this.price,
       productImageUrl: productImageUrl ?? this.productImageUrl,
       quantity: quantity ?? this.quantity,
     );
@@ -43,10 +52,9 @@ class CartItemEntity extends Equatable {
     id,
     productId,
     productName,
-    productPrice,
+    price,
     productImageUrl,
     quantity,
-    subtotal,
   ];
 
   @override

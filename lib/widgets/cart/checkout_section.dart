@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../constants/app_constants.dart';
+import '../../core/constants/app_constants.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
 import '../../features/cart/presentation/providers/cart_state.dart';
 import '../../features/cart/domain/entities/cart_entity.dart';

@@ -4,7 +4,7 @@ import '../../domain/entities/product_entity.dart';
 /// Modelo de dados que extends ProductEntity
 /// Responsável pela serialização JSON e conversão para Entity
 class ProductModel extends ProductEntity {
-  const ProductModel({
+  ProductModel({
     required super.id,
     required super.name,
     required super.description,
@@ -13,6 +13,8 @@ class ProductModel extends ProductEntity {
     required super.categoryId,
     required super.isAvailable,
     required super.availableQuantity,
+    super.createdAt,
+    super.updatedAt,
   });
 
   /// Cria ProductModel a partir de JSON
@@ -26,6 +28,14 @@ class ProductModel extends ProductEntity {
       categoryId: json['categoryId'] as String,
       isAvailable: json['isAvailable'] as bool? ?? true,
       availableQuantity: json['availableQuantity'] as int,
+      createdAt:
+          json['createdAt'] != null
+              ? DateTime.parse(json['createdAt'] as String)
+              : null,
+      updatedAt:
+          json['updatedAt'] != null
+              ? DateTime.parse(json['updatedAt'] as String)
+              : null,
     );
   }
 
@@ -40,6 +50,8 @@ class ProductModel extends ProductEntity {
       'categoryId': categoryId,
       'isAvailable': isAvailable,
       'availableQuantity': availableQuantity,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
@@ -54,6 +66,8 @@ class ProductModel extends ProductEntity {
       categoryId: categoryId,
       isAvailable: isAvailable,
       availableQuantity: availableQuantity,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 
@@ -68,6 +82,8 @@ class ProductModel extends ProductEntity {
       categoryId: entity.categoryId,
       isAvailable: entity.isAvailable,
       availableQuantity: entity.availableQuantity,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
     );
   }
 
@@ -95,6 +111,8 @@ class ProductModel extends ProductEntity {
     String? categoryId,
     bool? isAvailable,
     int? availableQuantity,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -105,6 +123,8 @@ class ProductModel extends ProductEntity {
       categoryId: categoryId ?? this.categoryId,
       isAvailable: isAvailable ?? this.isAvailable,
       availableQuantity: availableQuantity ?? this.availableQuantity,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

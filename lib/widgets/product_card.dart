@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:provider/provider.dart'; // COMENTADO - Provider antigo
 import '../features/products/domain/entities/product_entity.dart';
-import '../constants/app_constants.dart';
+import '../core/constants/app_constants.dart';
 import '../features/cart/presentation/providers/cart_provider.dart';
 import 'package:intl/intl.dart';
 
@@ -58,7 +58,14 @@ class _ProductCardState extends ConsumerState<ProductCard>
     });
 
     // MIGRADO: Usar CartProvider Riverpod ao invés do Provider antigo
-    ref.read(cartProvider.notifier).addProduct(widget.product.id);
+    ref
+        .read(cartProvider.notifier)
+        .addProduct(
+          productId: widget.product.id,
+          productName: widget.product.name,
+          price: widget.product.priceAsMoney,
+          productImageUrl: widget.product.imageUrl,
+        );
 
     Future.delayed(const Duration(milliseconds: 80), () {
       if (mounted) {

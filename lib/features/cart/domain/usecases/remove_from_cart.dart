@@ -1,19 +1,48 @@
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../../core/utils/typedef.dart';
+import '../../../../core/errors/failures.dart';
+
+import '../../../../shared/domain/use_cases/base_use_case.dart';
 import '../entities/cart_entity.dart';
 import '../repositories/cart_repository.dart';
 
 /// Use case para remover item do carrinho
-class RemoveFromCart {
+class RemoveFromCart extends UseCase<CartEntity, RemoveFromCartParams>
+    with UseCaseLogging {
   final CartRepository repository;
 
-  const RemoveFromCart(this.repository);
+  RemoveFromCart(this.repository);
 
-  /// Executa o use case para remover produto do carrinho
-  /// Retorna [FutureEither<CartEntity>]
-  FutureEither<CartEntity> call(RemoveFromCartParams params) async {
-    return await repository.removeItem(params.productId);
+  @override
+  Future<Either<Failure, CartEntity>> call(RemoveFromCartParams params) async {
+    logExecution('RemoveFromCart', params);
+
+    try {
+      // Validações de negócio
+      if (params.productId.trim().isEmpty) {
+        final failure = ValidationFailure(
+          message: 'ID do produto é obrigatório',
+        );
+        logError('RemoveFromCart', failure);
+        return Left(failure);
+      }
+
+      final result = await repository.removeItem(params.productId);
+
+      result.fold(
+        (failure) => logError('RemoveFromCart', failure),
+        (cart) => logSuccess('RemoveFromCart', cart),
+      );
+
+      return result;
+    } catch (e) {
+      final failure = UnknownFailure(
+        message: 'Erro inesperado ao remover item: $e',
+      );
+      logError('RemoveFromCart', failure);
+      return Left(failure);
+    }
   }
 }
 

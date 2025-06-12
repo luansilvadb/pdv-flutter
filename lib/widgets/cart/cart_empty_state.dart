@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import '../../constants/app_constants.dart';
+import '../../core/constants/app_constants.dart';
 
 /// Estado vazio do carrinho com orientações para o usuário
 ///

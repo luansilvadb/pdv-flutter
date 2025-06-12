@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/dependency_injection.dart';
 import '../../domain/entities/product_entity.dart';
-import '../../domain/usecases/get_all_products.dart';
-import '../../domain/usecases/get_products_by_category.dart';
+import '../../domain/use_cases/get_available_products.dart';
+import '../../domain/use_cases/filter_products_by_category.dart';
+import '../../domain/use_cases/search_products.dart';
 
 /// Estado dos produtos
 class ProductsState {
@@ -35,17 +36,21 @@ class ProductsState {
 
 /// Notifier para gerenciar estado dos produtos
 class ProductsNotifier extends StateNotifier<ProductsState> {
-  final GetAllProducts _getAllProducts;
-  final GetProductsByCategory _getProductsByCategory;
+  final GetAvailableProducts _getAvailableProducts;
+  final FilterProductsByCategory _filterProductsByCategory;
+  final SearchProducts _searchProducts;
 
-  ProductsNotifier(this._getAllProducts, this._getProductsByCategory)
-    : super(const ProductsState());
+  ProductsNotifier(
+    this._getAvailableProducts,
+    this._filterProductsByCategory,
+    this._searchProducts,
+  ) : super(const ProductsState());
 
-  /// Carrega todos os produtos
-  Future<void> loadAllProducts() async {
+  /// Carrega produtos disponíveis
+  Future<void> loadAvailableProducts() async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getAllProducts();
+    final result = await _getAvailableProducts();
 
     result.fold(
       (failure) =>
@@ -64,8 +69,8 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
   Future<void> loadProductsByCategory(String categoryId) async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final params = GetProductsByCategoryParams(categoryId: categoryId);
-    final result = await _getProductsByCategory(params);
+    final params = FilterProductsByCategoryParams(categoryId: categoryId);
+    final result = await _filterProductsByCategory(params);
 
     result.fold(
       (failure) =>
@@ -80,9 +85,29 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
     );
   }
 
-  /// Limpa o filtro de categoria e carrega todos os produtos
+  /// Busca produtos por query
+  Future<void> searchProducts(String query) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    final params = SearchProductsParams(query: query);
+    final result = await _searchProducts(params);
+
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (products) =>
+          state = state.copyWith(
+            isLoading: false,
+            products: products,
+            selectedCategoryId: null,
+            error: null,
+          ),
+    );
+  }
+
+  /// Limpa o filtro de categoria e carrega produtos disponíveis
   Future<void> clearCategoryFilter() async {
-    await loadAllProducts();
+    await loadAvailableProducts();
   }
 
   /// Busca um produto específico pelo ID na lista atual
@@ -113,8 +138,9 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
 final productsNotifierProvider =
     StateNotifierProvider<ProductsNotifier, ProductsState>((ref) {
       return ProductsNotifier(
-        sl<GetAllProducts>(),
-        sl<GetProductsByCategory>(),
+        sl<GetAvailableProducts>(),
+        sl<FilterProductsByCategory>(),
+        sl<SearchProducts>(),
       );
     });
 

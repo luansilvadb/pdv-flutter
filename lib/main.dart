@@ -8,7 +8,7 @@ import 'screens/main_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar dependências
+  // Inicializar dependências com nova arquitetura Clean
   await initializeDependencies();
 
   runApp(const ProviderScope(child: PDVRestaurantApp()));

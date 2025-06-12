@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants/app_constants.dart';
+import '../core/constants/app_constants.dart';
 import '../features/products/presentation/providers/products_provider.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/product_card.dart';
@@ -553,7 +553,9 @@ class MenuScreen extends ConsumerWidget {
                 ),
                 onPressed: () {
                   // Carregar todos os produtos
-                  ref.read(productsNotifierProvider.notifier).loadAllProducts();
+                  ref
+                      .read(productsNotifierProvider.notifier)
+                      .loadAvailableProducts();
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

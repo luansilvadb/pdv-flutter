@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants/app_constants.dart';
+import '../core/constants/app_constants.dart';
 import '../features/navigation/presentation/providers/navigation_provider.dart';
 import '../features/navigation/presentation/providers/navigation_state.dart';
 import '../screens/menu_screen.dart';

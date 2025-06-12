@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:provider/provider.dart'; // COMENTADO - Provider antigo
 import '../features/products/domain/entities/category_entity.dart';
 
-import '../constants/app_constants.dart';
+import '../core/constants/app_constants.dart';
 import '../features/products/presentation/providers/category_provider.dart';
 import '../features/products/presentation/providers/products_provider.dart';
 

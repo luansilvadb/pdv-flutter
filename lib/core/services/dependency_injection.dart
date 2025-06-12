@@ -11,8 +11,9 @@ import '../../features/products/data/datasources/product_local_datasource.dart';
 import '../../features/products/data/datasources/product_local_datasource_impl.dart';
 import '../../features/products/data/repositories/product_repository_impl.dart';
 import '../../features/products/domain/repositories/product_repository.dart';
-import '../../features/products/domain/usecases/get_all_products.dart';
-import '../../features/products/domain/usecases/get_products_by_category.dart';
+import '../../features/products/domain/use_cases/get_available_products.dart';
+import '../../features/products/domain/use_cases/filter_products_by_category.dart';
+import '../../features/products/domain/use_cases/search_products.dart';
 
 // Cart feature imports
 import '../../features/cart/data/datasources/cart_local_datasource.dart';
@@ -96,11 +97,14 @@ Future<void> _initProductsFeature() async {
   );
 
   // Use cases
-  sl.registerLazySingleton<GetAllProducts>(() => GetAllProducts(sl()));
-
-  sl.registerLazySingleton<GetProductsByCategory>(
-    () => GetProductsByCategory(sl()),
+  sl.registerLazySingleton<GetAvailableProducts>(
+    () => GetAvailableProducts(sl()),
   );
+
+  sl.registerLazySingleton<FilterProductsByCategory>(
+    () => FilterProductsByCategory(sl()),
+  );
+  sl.registerLazySingleton<SearchProducts>(() => SearchProducts(sl()));
 }
 
 /// Inicializa dependências do módulo Cart
@@ -112,11 +116,7 @@ Future<void> _initCartFeature() async {
 
   // Repositories
   sl.registerLazySingleton<CartRepository>(
-    () => CartRepositoryImpl(
-      localDataSource: sl(),
-      productRepository: sl(),
-      logger: sl(),
-    ),
+    () => CartRepositoryImpl(localDataSource: sl(), logger: sl()),
   );
 
   // Use cases

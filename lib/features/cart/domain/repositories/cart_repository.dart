@@ -1,19 +1,16 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
-
+import '../../../../shared/domain/value_objects/quantity.dart';
 import '../entities/cart_entity.dart';
+import '../entities/cart_item_entity.dart';
 
 /// Interface abstrata para operações do carrinho
 abstract class CartRepository {
   /// Busca o carrinho atual
   Future<Either<Failure, CartEntity>> getCart();
 
-  /// Adiciona um produto ao carrinho
-  /// Se o produto já existe, incrementa a quantidade
-  Future<Either<Failure, CartEntity>> addItem({
-    required String productId,
-    required int quantity,
-  });
+  /// Adiciona um item ao carrinho
+  Future<Either<Failure, CartEntity>> addItem(CartItemEntity item);
 
   /// Remove um item completamente do carrinho
   Future<Either<Failure, CartEntity>> removeItem(String productId);
@@ -22,7 +19,7 @@ abstract class CartRepository {
   /// Se quantity <= 0, remove o item
   Future<Either<Failure, CartEntity>> updateQuantity({
     required String productId,
-    required int quantity,
+    required Quantity quantity,
   });
 
   /// Incrementa a quantidade de um item em 1
@@ -42,5 +39,5 @@ abstract class CartRepository {
   Future<Either<Failure, bool>> containsProduct(String productId);
 
   /// Obtém a quantidade de um produto específico
-  Future<Either<Failure, int>> getProductQuantity(String productId);
+  Future<Either<Failure, Quantity>> getProductQuantity(String productId);
 }
