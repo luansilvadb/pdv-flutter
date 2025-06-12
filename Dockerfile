@@ -51,7 +51,8 @@ RUN curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/sta
 WORKDIR /app
 
 # Copiar arquivos de configuração primeiro (para cache do Docker)
-COPY pubspec.yaml pubspec.lock ./
+COPY pubspec.yaml ./
+# pubspec.lock será gerado automaticamente pelo flutter pub get
 
 # Instalar dependências Flutter (layer cached)
 RUN flutter pub get

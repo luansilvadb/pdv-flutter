@@ -168,7 +168,7 @@ lint-results.xml
 .flutter
 .metadata
 analysis_options.yaml
-pubspec.lock
+
 
 # =============================================================================
 # 📱 ARQUIVOS ESPECÍFICOS DO FLUTTER

@@ -61,7 +61,8 @@ WORKDIR /app
 USER flutterdev
 
 # Copiar arquivos de configuração
-COPY --chown=flutterdev:flutterdev pubspec.yaml pubspec.lock ./
+COPY --chown=flutterdev:flutterdev pubspec.yaml ./
+# pubspec.lock será gerado automaticamente pelo flutter pub get
 
 # Instalar dependências Flutter
 RUN flutter pub get
