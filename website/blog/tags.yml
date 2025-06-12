@@ -1,3 +1,23 @@
+lançamento:
+  label: Lançamento
+  permalink: /lancamento
+  description: Posts sobre lançamentos e novidades do PDV Restaurant
+
+flutter:
+  label: Flutter
+  permalink: /flutter
+  description: Conteúdo relacionado ao framework Flutter
+
+clean-architecture:
+  label: Clean Architecture
+  permalink: /clean-architecture
+  description: Posts sobre arquitetura limpa e boas práticas
+
+pdv:
+  label: PDV
+  permalink: /pdv
+  description: Conteúdo sobre sistemas de ponto de venda
+
 facebook:
   label: Facebook
   permalink: /facebook

@@ -141,16 +141,129 @@
 .menu__link {
   border-radius: var(--ifm-global-radius);
   transition: all 0.2s ease;
+  margin: 2px 0;
+  padding: 8px 12px;
+  font-weight: 500;
 }
 
 .menu__link:hover {
   background: var(--ifm-color-primary-lightest);
   color: var(--ifm-color-primary-dark);
+  transform: translateX(4px);
 }
 
 .menu__link--active {
   background: var(--ifm-color-primary);
   color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255, 138, 101, 0.3);
+}
+
+/* Categorias da sidebar */
+.menu__list-item--collapsed .menu__link,
+.menu__list-item .menu__link {
+  position: relative;
+}
+
+/* Ícones de categoria */
+.menu__link[href*="getting-started"]::before,
+.menu__link[href*="architecture"]::before,
+.menu__link[href*="features"]::before,
+.menu__link[href*="development"]::before,
+.menu__link[href*="guides"]::before,
+.menu__link[href*="reference"]::before,
+.menu__link[href*="tutorial"]::before {
+  margin-right: 8px;
+  font-size: 1.1em;
+}
+
+/* Subitens da sidebar */
+.menu__list .menu__list {
+  margin-left: 16px;
+  border-left: 2px solid var(--ifm-color-emphasis-200);
+  padding-left: 8px;
+}
+
+.menu__list .menu__list .menu__link {
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  color: var(--ifm-color-emphasis-700);
+  position: relative;
+}
+
+.menu__list .menu__list .menu__link::before {
+  content: "•";
+  color: var(--ifm-color-primary);
+  font-weight: bold;
+  margin-right: 8px;
+  font-size: 1.2em;
+}
+
+.menu__list .menu__list .menu__link:hover {
+  background: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-dark);
+  transform: translateX(2px);
+}
+
+.menu__list .menu__list .menu__link--active {
+  background: linear-gradient(90deg, var(--ifm-color-primary-lightest) 0%, transparent 100%);
+  color: var(--ifm-color-primary-dark);
+  border-left: 3px solid var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+/* Categorias colapsáveis */
+.menu__list-item--collapsed > .menu__link {
+  background: var(--ifm-color-emphasis-100);
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.menu__list-item--collapsed > .menu__link:hover {
+  background: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-dark);
+}
+
+/* Setas de expansão */
+.menu__caret {
+  transition: transform 0.2s ease;
+}
+
+.menu__list-item--collapsed .menu__caret {
+  transform: rotate(-90deg);
+}
+
+/* Espaçamento entre seções */
+.menu__list-item + .menu__list-item {
+  margin-top: 4px;
+}
+
+/* Destaque para seções principais */
+.menu__list > .menu__list-item > .menu__link {
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 10px 12px;
+  margin: 4px 0;
+}
+
+/* Tema escuro - ajustes para sidebar */
+[data-theme='dark'] .menu__list .menu__list {
+  border-left-color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme='dark'] .menu__list .menu__list .menu__link {
+  color: var(--ifm-color-emphasis-600);
+}
+
+[data-theme='dark'] .menu__list .menu__list .menu__link:hover {
+  background: rgba(255, 138, 101, 0.1);
+  color: var(--ifm-color-primary-light);
+}
+
+[data-theme='dark'] .menu__list .menu__list .menu__link--active {
+  background: linear-gradient(90deg, rgba(255, 138, 101, 0.2) 0%, transparent 100%);
+  color: var(--ifm-color-primary-light);
+  border-left-color: var(--ifm-color-primary-light);
 }
 
 /* Footer personalizado */

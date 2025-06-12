@@ -1,3 +1,13 @@
+luansilva:
+  name: Luan Silva
+  title: Desenvolvedor Flutter & Criador do PDV Restaurant
+  url: https://github.com/luansilvadb
+  image_url: https://github.com/luansilvadb.png
+  page: true
+  socials:
+    github: luansilvadb
+    linkedin: luansilvadb
+
 yangshun:
   name: Yangshun Tay
   title: Ex-Meta Staff Engineer, Co-founder GreatFrontEnd

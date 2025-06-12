@@ -16,14 +16,93 @@ const sidebars: SidebarsConfig = {
   // Sidebar principal da documentação
   tutorialSidebar: [
     'intro',
-    'getting-started',
-    'architecture',
-    'features',
-    'api-reference',
-    'changelog',
     {
       type: 'category',
-      label: 'Tutoriais',
+      label: '🚀 Começando',
+      collapsed: false,
+      items: [
+        'getting-started',
+        {
+          type: 'category',
+          label: 'Instalação',
+          items: [
+            'installation/prerequisites',
+            'installation/flutter-setup',
+            'installation/project-setup',
+            'installation/troubleshooting',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Primeiros Passos',
+          items: [
+            'first-steps/running-app',
+            'first-steps/understanding-structure',
+            'first-steps/basic-usage',
+          ],
+        },
+      ],
+    },
+    {
+      type: 'category',
+      label: '🏗️ Arquitetura',
+      collapsed: false,
+      items: [
+        'architecture',
+        {
+          type: 'category',
+          label: 'Clean Architecture',
+          items: [
+            'architecture/clean-architecture-overview',
+            'architecture/domain-layer',
+            'architecture/data-layer',
+            'architecture/presentation-layer',
+          ],
+        },
+      ],
+    },
+    {
+      type: 'category',
+      label: '✨ Funcionalidades',
+      collapsed: false,
+      items: [
+        'features',
+        {
+          type: 'category',
+          label: 'Interface do Usuário',
+          items: [
+            'features/ui/modern-interface',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Catálogo de Produtos',
+          items: [
+            'features/products/product-catalog',
+          ],
+        },
+      ],
+    },
+    {
+      type: 'category',
+      label: '🔧 Desenvolvimento',
+      collapsed: true,
+      items: [
+        'api-reference',
+      ],
+    },
+    {
+      type: 'category',
+      label: '📋 Referência',
+      collapsed: true,
+      items: [
+        'changelog',
+      ],
+    },
+    {
+      type: 'category',
+      label: '🎓 Tutoriais',
+      collapsed: true,
       items: [
         'tutorial-basics/create-a-document',
         'tutorial-basics/create-a-page',
@@ -31,14 +110,6 @@ const sidebars: SidebarsConfig = {
         'tutorial-basics/markdown-features',
         'tutorial-basics/deploy-your-site',
         'tutorial-basics/congratulations',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Extras',
-      items: [
-        'tutorial-extras/manage-docs-versions',
-        'tutorial-extras/translate-your-site',
       ],
     },
   ],
