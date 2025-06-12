@@ -41,10 +41,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Download e instalação do Flutter
+# Download e extração do Flutter
 RUN curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
-    | tar -xJ -C /opt/ \
-    && flutter config --no-analytics \
+    | tar -xJ -C /opt/
+
+# Configurar Git safe directory
+RUN git config --global --add safe.directory /opt/flutter
+
+# Configurar Flutter
+RUN flutter config --no-analytics \
     && flutter config --enable-web \
     && flutter precache --web \
     && flutter doctor -v
