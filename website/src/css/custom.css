@@ -1,0 +1,308 @@
+/**
+ * PDV Restaurant - Custom CSS
+ * Tema personalizado baseado no design do projeto
+ */
+
+/* Variáveis de cores do PDV Restaurant */
+:root {
+  /* Cores principais do PDV Restaurant */
+  --ifm-color-primary: #FF8A65;
+  --ifm-color-primary-dark: #FF7043;
+  --ifm-color-primary-darker: #FF5722;
+  --ifm-color-primary-darkest: #E64A19;
+  --ifm-color-primary-light: #FFAB91;
+  --ifm-color-primary-lighter: #FFCCBC;
+  --ifm-color-primary-lightest: #FFF3E0;
+  
+  /* Cores secundárias */
+  --ifm-color-secondary: #4FC3F7;
+  --ifm-color-secondary-dark: #29B6F6;
+  --ifm-color-secondary-darker: #03A9F4;
+  --ifm-color-secondary-darkest: #0288D1;
+  
+  /* Cores de sucesso */
+  --ifm-color-success: #4CAF50;
+  --ifm-color-success-dark: #388E3C;
+  
+  /* Configurações de código */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 138, 101, 0.1);
+  
+  /* Fontes */
+  --ifm-font-family-base: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  --ifm-font-family-monospace: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+  
+  /* Bordas e sombras */
+  --ifm-global-radius: 8px;
+  --ifm-card-border-radius: 12px;
+  --ifm-button-border-radius: 8px;
+}
+
+/* Tema escuro - cores ajustadas para o PDV Restaurant */
+[data-theme='dark'] {
+  --ifm-color-primary: #FF8A65;
+  --ifm-color-primary-dark: #FF7043;
+  --ifm-color-primary-darker: #FF5722;
+  --ifm-color-primary-darkest: #E64A19;
+  --ifm-color-primary-light: #FFAB91;
+  --ifm-color-primary-lighter: #FFCCBC;
+  --ifm-color-primary-lightest: #FFF3E0;
+  
+  --ifm-color-secondary: #4FC3F7;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 138, 101, 0.2);
+  
+  /* Background personalizado para tema escuro */
+  --ifm-background-color: #121212;
+  --ifm-background-surface-color: #1E1E1E;
+}
+
+/* Estilização do hero banner */
+.hero {
+  background: linear-gradient(135deg, var(--ifm-color-primary) 0%, var(--ifm-color-secondary) 100%);
+  color: white;
+}
+
+.hero__title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hero__subtitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+/* Botões personalizados */
+.button {
+  border-radius: var(--ifm-button-border-radius);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.button--secondary {
+  background: white;
+  color: var(--ifm-color-primary);
+  border: 2px solid white;
+}
+
+.button--secondary:hover {
+  background: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-dark);
+}
+
+.button--outline {
+  border: 2px solid white;
+  color: white;
+  background: transparent;
+}
+
+.button--outline:hover {
+  background: white;
+  color: var(--ifm-color-primary);
+}
+
+/* Cards personalizados */
+.card {
+  border-radius: var(--ifm-card-border-radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilização de código */
+.prism-code {
+  border-radius: var(--ifm-global-radius);
+}
+
+/* Navbar personalizada */
+.navbar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar__brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+/* Sidebar personalizada */
+.menu__link {
+  border-radius: var(--ifm-global-radius);
+  transition: all 0.2s ease;
+}
+
+.menu__link:hover {
+  background: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-dark);
+}
+
+.menu__link--active {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+/* Footer personalizado */
+.footer {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+.footer__title {
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+/* Badges e tags */
+.badge {
+  border-radius: 20px;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+}
+
+.badge--primary {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+.badge--secondary {
+  background: var(--ifm-color-secondary);
+  color: white;
+}
+
+.badge--success {
+  background: var(--ifm-color-success);
+  color: white;
+}
+
+/* Tabelas responsivas */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--ifm-global-radius);
+}
+
+table {
+  border-radius: var(--ifm-global-radius);
+  overflow: hidden;
+}
+
+/* Alertas personalizados */
+.alert {
+  border-radius: var(--ifm-global-radius);
+  border-left: 4px solid;
+}
+
+.alert--primary {
+  border-left-color: var(--ifm-color-primary);
+}
+
+.alert--secondary {
+  border-left-color: var(--ifm-color-secondary);
+}
+
+.alert--success {
+  border-left-color: var(--ifm-color-success);
+}
+
+/* Animações personalizadas */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .hero__title {
+    font-size: 2.5rem;
+  }
+  
+  .hero__subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .button {
+    margin: 0.25rem;
+    width: 100%;
+  }
+}
+
+/* Melhorias de acessibilidade */
+.button:focus,
+.menu__link:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-color-emphasis-200);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-primary-dark);
+}
+
+/* Estilização específica para features */
+.features {
+  padding: 4rem 0;
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--ifm-color-primary);
+}
+
+/* Estilização para versões e changelog */
+.version-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.version-badge--stable {
+  background: var(--ifm-color-success);
+  color: white;
+}
+
+.version-badge--development {
+  background: var(--ifm-color-warning);
+  color: white;
+}
+
+.version-badge--planned {
+  background: var(--ifm-color-secondary);
+  color: white;
+}
