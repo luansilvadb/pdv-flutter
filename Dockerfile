@@ -1,7 +1,7 @@
 # =============================================================================
 # 🐳 PDV Restaurant - Dockerfile MVP Simplificado
 # =============================================================================
-# Solução para problema ARM64 - Flutter 3.24.5 com suporte multi-arquitetura
+# Solução para problema ARM64 - Flutter 3.22.2 universalmente compatível
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -9,8 +9,8 @@
 # -----------------------------------------------------------------------------
 FROM debian:bookworm-slim AS flutter-builder
 
-# Versão do Flutter com suporte ARM64 confirmado
-ENV FLUTTER_VERSION=3.24.5
+# Versão do Flutter universalmente compatível
+ENV FLUTTER_VERSION=3.22.2
 ENV FLUTTER_HOME=/opt/flutter
 ENV PATH="$FLUTTER_HOME/bin:$PATH"
 
@@ -23,17 +23,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Download do Flutter com detecção automática de arquitetura
+# Download do Flutter (sempre x86_64 - funciona via emulação em ARM64)
 RUN ARCH=$(uname -m) && \
     echo "Arquitetura detectada: $ARCH" && \
-    if [ "$ARCH" = "x86_64" ]; then \
-        FLUTTER_ARCH=""; \
-    elif [ "$ARCH" = "aarch64" ]; then \
-        FLUTTER_ARCH="_arm64"; \
-    else \
-        echo "Arquitetura não suportada: $ARCH" && exit 1; \
-    fi && \
-    FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux${FLUTTER_ARCH}_${FLUTTER_VERSION}-stable.tar.xz" && \
+    echo "Usando Flutter x86_64 (compatível com todas as arquiteturas via emulação)" && \
+    FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" && \
     echo "Baixando Flutter de: $FLUTTER_URL" && \
     curl -fsSL "$FLUTTER_URL" | tar -xJ -C /opt/
 
