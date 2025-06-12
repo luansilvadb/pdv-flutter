@@ -44,3 +44,15 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 .vercel
+
+# Node.js dependencies (for Docusaurus)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Docusaurus build output
+website/build/
+website/.docusaurus/
+website/node_modules/
