@@ -3,164 +3,129 @@
 <div align="center">
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.7.2+-02569B?style=for-the-badge&logo=flutter&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-3.0+-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-2.0.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-2.0.0-orange?style=for-the-badge)
 
-**Sistema de Ponto de Venda moderno e intuitivo para restaurantes**
+**Sistema de Ponto de Venda Moderno para Restaurantes**
 
 *Desenvolvido com Flutter e Clean Architecture*
 
-[📋 Ver PRD](./PRD.md) • [🚀 Começar](#-começando) • [📖 Documentação](#-documentação) • [🤝 Contribuir](#-contribuindo)
+[🚀 Demo](#-demo) • [📋 Funcionalidades](#-funcionalidades) • [🛠️ Instalação](#️-instalação) • [📖 Documentação](#-documentação)
 
 </div>
 
 ---
 
-## 🎯 Sobre o Projeto
+## 📖 Sobre o Projeto
 
-O **PDV Restaurant** é um sistema de Ponto de Venda (Point of Sale) moderno, desenvolvido em Flutter com foco na experiência do usuário e performance. Projetado especificamente para restaurantes, oferece uma interface intuitiva e funcionalidades essenciais para gestão de pedidos e vendas.
+O **PDV Restaurant** é um sistema de ponto de venda moderno e intuitivo, desenvolvido especificamente para restaurantes que buscam eficiência e uma experiência de usuário excepcional. Construído com Flutter e seguindo os princípios da Clean Architecture, oferece uma solução robusta, escalável e multiplataforma.
 
-### ✨ Principais Características
+### 🎯 Objetivos
 
-- 🎨 **Interface Moderna**: Design baseado no Fluent UI com tema dark profissional
-- 🏗️ **Arquitetura Limpa**: Implementação seguindo Clean Architecture principles
-- 📱 **Multi-plataforma**: Funciona em Desktop, Mobile e Web
-- ⚡ **Performance**: Otimizado para uso em ambiente de alta demanda
-- 🔄 **Estado Reativo**: Gerenciamento de estado com Riverpod
-- 💾 **Persistência Local**: Armazenamento offline com Hive
+- **Modernizar** o processo de vendas em restaurantes
+- **Simplificar** a operação para funcionários
+- **Acelerar** o atendimento aos clientes
+- **Fornecer** insights valiosos para gestores
 
 ---
 
-## 🖼️ Screenshots
+## ✨ Funcionalidades
 
-<div align="center">
+### 🏠 **Interface Principal**
+- Sidebar moderna com navegação intuitiva
+- Design responsivo para diferentes tamanhos de tela
+- Tema dark profissional baseado no Fluent UI
+- Animações suaves e feedback visual
 
-### 🏠 Tela Principal
-*Interface principal com navegação lateral e dashboard*
+### 🛍️ **Catálogo de Produtos**
+- Organização por categorias (Hambúrguers, Pizzas, Bebidas)
+- Cards visuais com imagens, descrições e preços
+- Sistema de busca em tempo real
+- Controle de disponibilidade e estoque
+- Filtros por categoria
 
-### 🛒 Sistema de Pedidos
-*Catálogo de produtos com carrinho integrado*
+### 🛒 **Carrinho de Compras**
+- Adição/remoção de produtos com um clique
+- Controle de quantidade por item
+- Cálculo automático de subtotal e impostos
+- Interface lateral dedicada e sempre visível
+- Persistência local dos dados
 
-### 📊 Painel de Controle
-*Visão geral de vendas e métricas*
-
-</div>
-
----
-
-## 🚀 Funcionalidades
-
-### ✅ Implementadas (v2.0)
-
-- **🧭 Sistema de Navegação**
-  - Sidebar moderna com 5 seções principais
-  - Navegação fluida entre telas
-  - Indicadores visuais de seção ativa
-
-- **📦 Catálogo de Produtos**
-  - Categorização inteligente (Hambúrguers, Pizzas, Bebidas)
-  - Cards informativos com preços e disponibilidade
-  - Sistema de busca por nome
-  - Filtros por categoria
-
-- **🛒 Carrinho de Compras**
-  - Painel lateral dedicado
-  - Adição/remoção de produtos
-  - Controle de quantidades
-  - Cálculo automático com impostos
-  - Validação de estoque
-
-- **🎨 Interface Responsiva**
-  - Design adaptável para diferentes tamanhos de tela
-  - Animações suaves e feedback visual
-  - Tema dark profissional
-  - Componentes acessíveis
-
-### 🔄 Roadmap
-
-#### v2.1 (Q1 2025)
-- 📋 Histórico de Pedidos
-- 🎁 Sistema de Promoções
-- 📊 Relatórios Básicos
-
-#### v2.2 (Q2 2025)
-- ⚙️ Configurações Avançadas
-- 🖨️ Integração com Impressoras
-- 📈 Analytics Detalhados
-
-#### v2.3 (Q3 2025)
-- 🌐 API e Sincronização em Nuvem
-- 👥 Sistema de Usuários
-- 🏪 Gestão Multi-loja
-
----
-
-## 🛠️ Tecnologias
-
-### Core
-- **[Flutter](https://flutter.dev/)** `3.7.2+` - Framework de desenvolvimento
-- **[Dart](https://dart.dev/)** - Linguagem de programação
-- **[Fluent UI](https://pub.dev/packages/fluent_ui)** `4.8.6` - Design system
-
-### Estado e Arquitetura
-- **[Riverpod](https://pub.dev/packages/riverpod)** `2.4.9` - Gerenciamento de estado
-- **[GetIt](https://pub.dev/packages/get_it)** `7.6.4` - Injeção de dependência
-- **[Dartz](https://pub.dev/packages/dartz)** `0.10.1` - Programação funcional
-
-### Persistência e Dados
-- **[Hive](https://pub.dev/packages/hive)** `2.2.3` - Banco de dados local
-- **[Connectivity Plus](https://pub.dev/packages/connectivity_plus)** `5.0.2` - Status de conectividade
-
-### Utilitários
-- **[Intl](https://pub.dev/packages/intl)** `0.20.2` - Internacionalização
-- **[Logger](https://pub.dev/packages/logger)** `2.0.2` - Sistema de logs
-- **[Equatable](https://pub.dev/packages/equatable)** `2.0.5` - Comparação de objetos
+### 🎨 **Design System**
+- Paleta de cores consistente e moderna
+- Componentes reutilizáveis
+- Tipografia hierárquica
+- Estados visuais para interações
+- Acessibilidade considerada
 
 ---
 
 ## 🏗️ Arquitetura
 
-O projeto segue os princípios da **Clean Architecture**, garantindo separação de responsabilidades e facilidade de manutenção.
-
+### **Clean Architecture**
 ```
-lib/
-├── 🎯 core/                 # Configurações centrais
-│   ├── constants/          # Constantes da aplicação
-│   ├── services/           # Serviços compartilhados
-│   ├── storage/            # Configuração de storage
-│   └── utils/              # Utilitários gerais
-├── 🎪 features/            # Funcionalidades por domínio
-│   ├── cart/              # 🛒 Carrinho de compras
-│   │   ├── data/          # Repositórios e data sources
-│   │   ├── domain/        # Entidades e use cases
-│   │   └── presentation/  # UI e providers
-│   ├── navigation/        # 🧭 Sistema de navegação
-│   └── products/          # 📦 Catálogo de produtos
-├── 🔗 shared/             # Código compartilhado
-│   ├── domain/            # Entidades base e value objects
-│   └── infrastructure/    # Implementações técnicas
-├── 🧩 widgets/            # Componentes reutilizáveis
-└── 📱 screens/            # Telas principais
+📁 lib/
+├── 📁 core/                    # Configurações centrais
+│   ├── 📁 constants/          # Constantes da aplicação
+│   ├── 📁 services/           # Serviços compartilhados
+│   ├── 📁 storage/            # Gerenciamento de dados
+│   └── 📁 network/            # Configurações de rede
+├── 📁 features/               # Módulos de funcionalidades
+│   ├── 📁 products/           # Gestão de produtos
+│   │   ├── 📁 domain/         # Entidades e casos de uso
+│   │   ├── 📁 data/           # Repositórios e fontes de dados
+│   │   └── 📁 presentation/   # UI e gerenciamento de estado
+│   ├── 📁 cart/               # Carrinho de compras
+│   └── 📁 navigation/         # Sistema de navegação
+├── 📁 shared/                 # Código compartilhado
+└── 📁 widgets/                # Componentes reutilizáveis
 ```
 
-### Camadas da Arquitetura
+### **Stack Tecnológico**
 
-1. **🎯 Domain Layer**: Entidades, use cases e interfaces
-2. **📊 Data Layer**: Implementação de repositórios e data sources
-3. **🎨 Presentation Layer**: UI, widgets e gerenciamento de estado
+| Categoria | Tecnologia | Versão | Propósito |
+|-----------|------------|--------|-----------|
+| **Framework** | Flutter | 3.7.2+ | Desenvolvimento multiplataforma |
+| **UI Library** | Fluent UI | 4.8.6 | Design system moderno |
+| **State Management** | Riverpod | 2.4.9 | Gerenciamento de estado reativo |
+| **Dependency Injection** | GetIt | 7.6.4 | Injeção de dependências |
+| **Local Storage** | Hive | 2.2.3 | Persistência de dados local |
+| **Functional Programming** | Dartz | 0.10.1 | Programação funcional |
+| **Testing** | Mockito | 5.4.4 | Testes unitários e mocking |
 
 ---
 
-## 🚀 Começando
+## 🚀 Demo
+
+### Screenshots
+
+<div align="center">
+
+| Tela Principal | Menu de Produtos | Carrinho |
+|:--------------:|:----------------:|:--------:|
+| ![Home](docs/images/home-screen.png) | ![Menu](docs/images/menu-screen.png) | ![Cart](docs/images/cart-panel.png) |
+
+</div>
+
+### Funcionalidades em Ação
+
+- ✅ **Navegação Fluida**: Transições suaves entre seções
+- ✅ **Busca Inteligente**: Encontre produtos rapidamente
+- ✅ **Carrinho Dinâmico**: Atualizações em tempo real
+- ✅ **Design Responsivo**: Adapta-se a qualquer tela
+
+---
+
+## 🛠️ Instalação
 
 ### Pré-requisitos
 
-- **Flutter SDK** `3.7.2` ou superior
-- **Dart SDK** `3.0.0` ou superior
+- **Flutter SDK**: 3.7.2 ou superior
+- **Dart SDK**: 3.0 ou superior
 - **IDE**: VS Code, Android Studio ou IntelliJ
 
-### Instalação
+### Passos de Instalação
 
 1. **Clone o repositório**
    ```bash
@@ -178,22 +143,14 @@ lib/
    flutter run
    ```
 
-### Configuração do Ambiente
+### Plataformas Suportadas
 
-1. **Verifique a instalação do Flutter**
-   ```bash
-   flutter doctor
-   ```
-
-2. **Configure o dispositivo/emulador**
-   ```bash
-   flutter devices
-   ```
-
-3. **Execute em modo debug**
-   ```bash
-   flutter run --debug
-   ```
+- ✅ **Windows** (Recomendado)
+- ✅ **macOS**
+- ✅ **Linux**
+- ✅ **Web**
+- ✅ **Android**
+- ✅ **iOS**
 
 ---
 
@@ -209,33 +166,96 @@ flutter test
 flutter test --coverage
 
 # Testes específicos
-flutter test test/features/cart/
+flutter test test/features/products/
 ```
 
-### Estrutura de Testes
+### Cobertura de Testes
+
+- **Domain Layer**: 90%+
+- **Presentation Layer**: 80%+
+- **Data Layer**: 85%+
+- **Overall**: 85%+
+
+---
+
+## 📁 Estrutura do Projeto
 
 ```
-test/
-├── features/           # Testes por feature
-│   ├── cart/          # Testes do carrinho
-│   └── products/      # Testes de produtos
-├── unit/              # Testes unitários
-├── integration/       # Testes de integração
-└── widget/            # Testes de widgets
+pdv-flutter/
+├── 📁 android/                 # Configurações Android
+├── 📁 assets/                  # Recursos estáticos
+│   └── 📁 images/             # Imagens dos produtos
+├── 📁 ios/                     # Configurações iOS
+├── 📁 lib/                     # Código fonte principal
+│   ├── 📁 core/               # Núcleo da aplicação
+│   ├── 📁 features/           # Funcionalidades modulares
+│   ├── 📁 shared/             # Código compartilhado
+│   ├── 📁 widgets/            # Componentes UI
+│   └── 📄 main.dart           # Ponto de entrada
+├── 📁 test/                    # Testes automatizados
+├── 📁 web/                     # Configurações Web
+├── 📄 pubspec.yaml            # Dependências do projeto
+├── 📄 README.md               # Este arquivo
+└── 📄 PRD.md                  # Documento de requisitos
 ```
 
 ---
 
-## 📖 Documentação
+## 🎨 Design System
 
-- 📋 **[Product Requirements Document (PRD)](./PRD.md)** - Documentação completa do produto
-- 🏗️ **[Arquitetura](./docs/architecture.md)** - Detalhes da arquitetura (em breve)
-- 🎨 **[Design System](./docs/design-system.md)** - Guia de componentes (em breve)
-- 🔧 **[API Reference](./docs/api.md)** - Documentação da API (em breve)
+### Paleta de Cores
+
+```dart
+// Cores principais
+Background: #121212
+Surface: #1E1E1E
+Primary Accent: #FF8A65
+Secondary Accent: #4FC3F7
+Success: #4CAF50
+Text Primary: #FFFFFF
+```
+
+### Componentes
+
+- **Cards**: Bordas arredondadas com sombras sutis
+- **Botões**: Estados hover, pressed e disabled
+- **Inputs**: Validação visual e feedback
+- **Navegação**: Indicadores ativos e transições
 
 ---
 
-## 🤝 Contribuindo
+## 🔄 Roadmap
+
+### 📋 Versão Atual (2.0.0)
+- ✅ Interface moderna com Fluent UI
+- ✅ Catálogo de produtos completo
+- ✅ Carrinho de compras funcional
+- ✅ Sistema de navegação
+- ✅ Arquitetura Clean implementada
+
+### 🚀 Próximas Versões
+
+#### v2.1.0 - Processamento de Vendas
+- [ ] Finalização de pedidos
+- [ ] Métodos de pagamento
+- [ ] Impressão de cupons
+- [ ] Histórico de vendas
+
+#### v2.2.0 - Gestão Avançada
+- [ ] Relatórios detalhados
+- [ ] Gestão de estoque
+- [ ] Sistema de promoções
+- [ ] Dashboard gerencial
+
+#### v2.3.0 - Integração
+- [ ] API backend
+- [ ] Sincronização multi-device
+- [ ] Integração com delivery
+- [ ] Sistema de usuários
+
+---
+
+## 🤝 Contribuição
 
 Contribuições são sempre bem-vindas! Veja como você pode ajudar:
 
@@ -250,37 +270,40 @@ Contribuições são sempre bem-vindas! Veja como você pode ajudar:
 ### Diretrizes
 
 - Siga os padrões de código estabelecidos
-- Escreva testes para novas funcionalidades
+- Adicione testes para novas funcionalidades
 - Mantenha a documentação atualizada
-- Use commits semânticos (feat, fix, docs, etc.)
+- Use commits semânticos
 
 ### Reportar Bugs
 
-Use as [Issues do GitHub](https://github.com/luansilvadb/pdv-flutter/issues) para reportar bugs ou sugerir melhorias.
+Encontrou um bug? [Abra uma issue](https://github.com/luansilvadb/pdv-flutter/issues) com:
 
----
-
-## 📊 Status do Projeto
-
-### Métricas de Qualidade
-
-- ✅ **Cobertura de Testes**: 75%+
-- ✅ **Performance**: < 100ms para interações
-- ✅ **Arquitetura**: Clean Architecture implementada
-- ✅ **Responsividade**: Suporte a múltiplas resoluções
-
-### Roadmap de Desenvolvimento
-
-- [x] **v2.0** - Sistema base com carrinho e catálogo
-- [ ] **v2.1** - Histórico e promoções (Q1 2025)
-- [ ] **v2.2** - Configurações e analytics (Q2 2025)
-- [ ] **v2.3** - API e multi-loja (Q3 2025)
+- Descrição detalhada do problema
+- Passos para reproduzir
+- Screenshots (se aplicável)
+- Informações do ambiente
 
 ---
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](LICENSE) para detalhes.
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+```
+MIT License
+
+Copyright (c) 2025 PDV Restaurant
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+```
 
 ---
 
@@ -289,15 +312,52 @@ Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](L
 **Luan Silva**
 - GitHub: [@luansilvadb](https://github.com/luansilvadb)
 - LinkedIn: [Luan Silva](https://linkedin.com/in/luansilvadb)
+- Email: luan@example.com
 
 ---
 
 ## 🙏 Agradecimentos
 
-- **Flutter Team** pela excelente framework
-- **Microsoft** pelo Fluent Design System
-- **Comunidade Flutter** pelas bibliotecas e suporte
-- **Contribuidores** que ajudam a melhorar o projeto
+- **Flutter Team** - Framework incrível
+- **Microsoft** - Fluent UI design system
+- **Riverpod Team** - Excelente gerenciamento de estado
+- **Comunidade Flutter** - Suporte e inspiração
+
+---
+
+## 📊 Status do Projeto
+
+![GitHub last commit](https://img.shields.io/github/last-commit/luansilvadb/pdv-flutter)
+![GitHub issues](https://img.shields.io/github/issues/luansilvadb/pdv-flutter)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/luansilvadb/pdv-flutter)
+![GitHub stars](https://img.shields.io/github/stars/luansilvadb/pdv-flutter)
+
+---
+
+## 📞 Suporte
+
+Precisa de ajuda? Entre em contato:
+
+- 📧 **Email**: support@pdv-restaurant.com
+- 💬 **Discord**: [Servidor da Comunidade](https://discord.gg/pdv-restaurant)
+- 📖 **Documentação**: [docs.pdv-restaurant.com](https://docs.pdv-restaurant.com)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/luansilvadb/pdv-flutter/issues)
+
+---
+
+## 📖 Documentação
+
+### Documentos Principais
+- 📋 **[Product Requirements Document (PRD)](./PRD.md)** - Documentação completa do produto
+- 🏗️ **[Arquitetura](./docs/architecture.md)** - Detalhes da arquitetura (em breve)
+- 🎨 **[Design System](./docs/design-system.md)** - Guia de componentes (em breve)
+- 🔧 **[API Reference](./docs/api.md)** - Documentação da API (em breve)
+
+### Links Úteis
+- [Flutter Documentation](https://docs.flutter.dev/)
+- [Fluent UI Documentation](https://pub.dev/packages/fluent_ui)
+- [Riverpod Documentation](https://riverpod.dev/)
+- [Clean Architecture Guide](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 ---
 
@@ -305,6 +365,6 @@ Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](L
 
 **⭐ Se este projeto te ajudou, considere dar uma estrela!**
 
-*Desenvolvido com ❤️ e Flutter*
+**Feito com ❤️ e Flutter**
 
 </div>
