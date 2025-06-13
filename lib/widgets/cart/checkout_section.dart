@@ -35,13 +35,12 @@ class CheckoutSection extends ConsumerWidget {
     required this.currentCart,
     required this.currencyFormatter,
   });
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // MIGRADO: Calcular totais a partir da CartEntity
-    final subtotal = currentCart.totalAmount;
-    final tax = subtotal * 0.10; // Taxa de serviço 10%
-    final total = subtotal + tax;
+    // MIGRADO: Usar os totais já calculados da CartEntity
+    final subtotal = currentCart.rawSubtotal.value; // Subtotal sem impostos
+    final tax = currentCart.tax.value; // Taxa já calculada
+    final total = currentCart.total.value; // Total já calculado
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingLarge),
