@@ -16,18 +16,20 @@ class CategoriesState {
     this.error,
     this.selectedCategoryId,
   });
-
   CategoriesState copyWith({
     List<CategoryEntity>? categories,
     bool? isLoading,
     String? error,
     String? selectedCategoryId,
+    bool clearSelectedCategory = false,
   }) {
     return CategoriesState(
       categories: categories ?? this.categories,
       isLoading: isLoading ?? this.isLoading,
       error: error,
-      selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
+      selectedCategoryId: clearSelectedCategory 
+          ? null 
+          : (selectedCategoryId ?? this.selectedCategoryId),
     );
   }
 }
@@ -66,10 +68,9 @@ class CategoriesNotifier extends StateNotifier<CategoriesState> {
   void clearSelection() {
     clearSelectedCategory();
   }
-
   /// Limpa a seleção de categoria
   void clearSelectedCategory() {
-    state = state.copyWith(selectedCategoryId: null);
+    state = state.copyWith(clearSelectedCategory: true);
   }
 
   /// Obtém uma categoria por ID

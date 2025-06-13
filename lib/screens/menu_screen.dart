@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../features/products/presentation/providers/products_provider.dart';
+import '../features/products/presentation/providers/category_provider.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/product_card.dart';
 import 'package:intl/intl.dart';
@@ -17,17 +18,30 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   @override
   void initState() {
     super.initState();
-    // Carrega os produtos automaticamente quando a tela é inicializada
+    // Carrega os produtos e categorias automaticamente quando a tela é inicializada
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(productsNotifierProvider.notifier).loadAvailableProducts();
+      ref.read(categoriesNotifierProvider.notifier).loadCategories();
     });
   }
-
   @override
   Widget build(BuildContext context) {
     final products = ref.watch(productsListProvider);
     final isLoading = ref.watch(isLoadingProductsProvider);
-    final error = ref.watch(productsErrorProvider);    return Container(
+    final error = ref.watch(productsErrorProvider);
+    
+    // React to category selection changes
+    ref.listen<String?>(selectedCategoryIdProvider, (previous, next) {
+      if (previous != next) {
+        if (next == null) {
+          // Se nenhuma categoria selecionada, carrega todos os produtos
+          ref.read(productsNotifierProvider.notifier).loadAvailableProducts();
+        } else {
+          // Se categoria selecionada, filtra produtos por categoria
+          ref.read(productsNotifierProvider.notifier).loadProductsByCategory(next);
+        }
+      }
+    });return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,

@@ -236,10 +236,9 @@ class _CategoryTabsState extends ConsumerState<CategoryTabs>
             }
             return AppElevations.level0;
           }),
-        ),
-        onPressed: () {
+        ),        onPressed: () {
           // MIGRADO: Usar CategoryProvider Riverpod para limpar seleção
-          ref.read(categoryNotifierProvider.notifier).clearSelection();
+          ref.read(categoriesNotifierProvider.notifier).clearSelection();
         },
         child: Container(
           decoration:
@@ -395,11 +394,10 @@ class _CategoryTabsState extends ConsumerState<CategoryTabs>
             }
             return AppElevations.level0;
           }),
-        ),
-        onPressed: () {
+        ),        onPressed: () {
           // MIGRADO: Usar CategoryProvider Riverpod para selecionar categoria
           ref
-              .read(categoryNotifierProvider.notifier)
+              .read(categoriesNotifierProvider.notifier)
               .selectCategory(category.id);
         },
         child: Container(

@@ -30,11 +30,10 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
       );
     }
   }
-
   /// Converte ID da categoria para nome legível
   String _getCategoryNameById(String categoryId) {
     switch (categoryId) {
-      case 'burgers':
+      case 'hamburgers':
         return 'Hambúrgueres';
       case 'pizzas':
         return 'Pizzas';
@@ -50,10 +49,31 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
         return categoryId.toUpperCase();
     }
   }
-
   /// Converte ID da categoria para caminho do ícone
   String _getCategoryIconPath(String categoryId) {
-    return 'assets/icons/$categoryId.png';
+    // Mapear IDs específicos para nomes de ícones se necessário
+    String iconName = categoryId;
+    switch (categoryId) {
+      case 'hamburgers':
+        iconName = 'hamburgers';
+        break;
+      case 'pizzas':
+        iconName = 'pizzas';
+        break;
+      case 'drinks':
+        iconName = 'drinks';
+        break;
+      case 'desserts':
+        iconName = 'desserts';
+        break;
+      case 'salads':
+        iconName = 'salads';
+        break;
+      case 'sides':
+        iconName = 'sides';
+        break;
+    }
+    return 'assets/icons/$iconName.png';
   }
 
   @override
