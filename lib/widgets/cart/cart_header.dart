@@ -144,53 +144,390 @@ class CartHeader extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  /// Exibe diálogo de confirmação para limpar carrinho - MIGRADO: usar Riverpod
+  }  /// Exibe diálogo de confirmação para limpar carrinho - MIGRADO: usar Riverpod
   void _showClearDialog(BuildContext context, WidgetRef ref) {
+    final itemCount = currentCart?.itemCount ?? 0;
+    
     showDialog(
       context: context,
-      builder:
-          (context) => ContentDialog(
-            title: Row(
+      barrierDismissible: true,      builder: (context) => ContentDialog(
+        title: _buildModalTitle(),
+        content: _buildModalContent(itemCount),        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildCancelButton(context),
+                const SizedBox(width: AppSizes.paddingSmall),
+                _buildConfirmButton(context, ref),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Constrói o título do modal com ícone e gradiente
+  Widget _buildModalTitle() {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.paddingMedium),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.error.withValues(alpha: 0.15),
+            AppColors.error.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+        border: Border.all(
+          color: AppColors.error.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.error.withValues(alpha: 0.2),
+                  AppColors.error.withValues(alpha: 0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.error.withValues(alpha: 0.2),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              FluentIcons.warning,
+              color: AppColors.error,
+              size: AppSizes.iconMedium,
+            ),
+          ),
+          const SizedBox(width: AppSizes.paddingMedium),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Limpar Carrinho',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Ação irreversível',
+                  style: TextStyle(
+                    color: AppColors.error,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Constrói o conteúdo do modal com informações detalhadas
+  Widget _buildModalContent(int itemCount) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.paddingLarge),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.surfaceVariant.withValues(alpha: 0.3),
+            AppColors.surfaceVariant.withValues(alpha: 0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+        border: Border.all(
+          color: AppColors.border.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Mensagem principal
+          Row(
+            children: [
+              Icon(
+                FluentIcons.info,
+                color: AppColors.textSecondary,
+                size: AppSizes.iconSmall,
+              ),
+              const SizedBox(width: AppSizes.paddingSmall),
+              Expanded(
+                child: Text(
+                  'Tem certeza que deseja remover todos os itens do carrinho?',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: AppSizes.paddingMedium),
+          
+          // Informações do carrinho
+          Container(
+            padding: const EdgeInsets.all(AppSizes.paddingMedium),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+              border: Border.all(
+                color: AppColors.border.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
+                    color: AppColors.primaryAccent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
                   ),
                   child: Icon(
-                    FluentIcons.warning,
-                    color: AppColors.error,
+                    FluentIcons.shopping_cart,
+                    color: AppColors.primaryAccent,
                     size: AppSizes.iconSmall,
                   ),
                 ),
                 const SizedBox(width: AppSizes.paddingMedium),
-                const Text('Limpar Carrinho'),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$itemCount ${itemCount == 1 ? 'item' : 'itens'} no carrinho',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (currentCart != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'Total: R\$ ${currentCart!.total.value.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: AppColors.priceColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
-            content: const Text(
-              'Tem certeza que deseja remover todos os itens do carrinho? Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              Button(
-                child: const Text('Cancelar'),
-                onPressed: () => Navigator.of(context).pop(),
+          ),
+          
+          const SizedBox(height: AppSizes.paddingMedium),
+          
+          // Aviso
+          Container(
+            padding: const EdgeInsets.all(AppSizes.paddingMedium),
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+              border: Border.all(
+                color: AppColors.warning.withValues(alpha: 0.2),
               ),
-              FilledButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(AppColors.error),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  FluentIcons.blocked2,
+                  color: AppColors.warning,
+                  size: AppSizes.iconSmall,
                 ),
-                child: const Text('Limpar Carrinho'),
-                onPressed: () {
-                  // MIGRADO: Usar CartProvider Riverpod para limpar carrinho
-                  ref.read(cartProvider.notifier).clearCart();
-                  Navigator.of(context).pop();
-                },
+                const SizedBox(width: AppSizes.paddingSmall),
+                Expanded(
+                  child: Text(
+                    'Esta ação não pode ser desfeita',
+                    style: TextStyle(
+                      color: AppColors.warning,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }  /// Constrói o botão de cancelar com estilo aprimorado
+  Widget _buildCancelButton(BuildContext context) {
+    return Expanded(
+      child: Button(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return AppColors.surfaceContainer;
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return AppColors.surfaceVariant.withValues(alpha: 0.5);
+            }
+            return AppColors.surfaceVariant.withValues(alpha: 0.3);
+          }),
+          foregroundColor: WidgetStateProperty.all(AppColors.textPrimary),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+              side: BorderSide(
+                color: AppColors.border.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),          ),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 10,
+            ),
+          ),
+          elevation: WidgetStateProperty.resolveWith<double>((states) {
+            if (states.contains(WidgetState.hovered)) {
+              return AppElevations.level2;
+            }
+            return AppElevations.level1;
+          }),
+        ),
+        onPressed: () => Navigator.of(context).pop(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              FluentIcons.cancel,
+              size: AppSizes.iconSmall,
+            ),
+            const SizedBox(width: AppSizes.paddingSmall),
+            const Flexible(
+              child: Text(
+                'Cancelar',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  letterSpacing: 0.3,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }  /// Constrói o botão de confirmar com gradiente e sombra
+  Widget _buildConfirmButton(BuildContext context, WidgetRef ref) {
+    return Expanded(
+      child: FilledButton(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return AppColors.error.withValues(alpha: 0.8);
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return AppColors.error.withValues(alpha: 0.9);
+            }
+            return AppColors.error;
+          }),
+          foregroundColor: WidgetStateProperty.all(Colors.white),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+            ),
+          ),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 10,
+            ),
+          ),
+          elevation: WidgetStateProperty.resolveWith<double>((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return AppElevations.level1;
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return AppElevations.level3;
+            }
+            return AppElevations.level2;
+          }),
+        ),
+        onPressed: () {
+          // MIGRADO: Usar CartProvider Riverpod para limpar carrinho
+          ref.read(cartProvider.notifier).clearCart();
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withValues(alpha: 0.1),
+                Colors.transparent,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                FluentIcons.delete,
+                size: AppSizes.iconSmall,
+                color: Colors.white,
+              ),
+              const SizedBox(width: AppSizes.paddingSmall),
+              const Flexible(
+                child: Text(
+                  'Limpar Carrinho',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    letterSpacing: 0.5,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
+        ),
+      ),
     );
   }
 }
