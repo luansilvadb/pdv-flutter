@@ -86,7 +86,6 @@ class ProductModel extends ProductEntity {
       updatedAt: entity.updatedAt,
     );
   }
-
   /// Cria ProductModel a partir do modelo antigo (para migração)
   factory ProductModel.fromLegacyProduct(dynamic legacyProduct) {
     return ProductModel(
@@ -95,7 +94,7 @@ class ProductModel extends ProductEntity {
       description: legacyProduct.description as String,
       price: (legacyProduct.price as num).toDouble(),
       imageUrl: legacyProduct.imageUrl as String,
-      categoryId: legacyProduct.category as String,
+      categoryId: legacyProduct.categoryId as String,
       isAvailable: legacyProduct.availableQuantity > 0,
       availableQuantity: legacyProduct.availableQuantity as int,
     );

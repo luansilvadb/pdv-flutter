@@ -3,14 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../features/navigation/presentation/providers/navigation_provider.dart';
 import '../features/navigation/presentation/providers/navigation_state.dart';
+import '../features/cart/presentation/providers/cart_provider.dart';
 import '../screens/menu_screen.dart';
 import '../widgets/cart_panel.dart';
 
-class MainScreen extends ConsumerWidget {
+class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends ConsumerState<MainScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Inicializar o carrinho assim que a tela principal carregar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(cartProvider.notifier).initialize();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final navigationState = ref.watch(navigationProvider);
 
     return Container(
@@ -26,19 +41,18 @@ class MainScreen extends ConsumerWidget {
           stops: const [0.0, 0.7, 1.0],
         ),
       ),
-      child: Row(
-        children: [
+      child: Row(        children: [
           // Enhanced Sidebar
-          _buildModernSidebar(ref, navigationState),
+          _buildModernSidebar(navigationState),
 
           // Main content
-          Expanded(child: _buildMainContent(ref, navigationState)),
+          Expanded(child: _buildMainContent(navigationState)),
         ],
       ),
     );
   }
 
-  Widget _buildModernSidebar(WidgetRef ref, NavigationState navigationState) {
+  Widget _buildModernSidebar(NavigationState navigationState) {
     return Container(
       width: AppSizes.sidebarWidth,
       decoration: BoxDecoration(
@@ -85,10 +99,8 @@ class MainScreen extends ConsumerWidget {
                 ],
               ),
             ),
-          ),
-
-          // Navigation Items
-          Expanded(child: _buildNavigationItems(ref, navigationState)),
+          ),          // Navigation Items
+          Expanded(child: _buildNavigationItems(navigationState)),
 
           // Branding Footer
           _buildBrandingFooter(),
@@ -158,7 +170,7 @@ class MainScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildNavigationItems(WidgetRef ref, NavigationState navigationState) {
+  Widget _buildNavigationItems(NavigationState navigationState) {
     return ListView(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.paddingMedium,
@@ -319,7 +331,7 @@ class MainScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMainContent(WidgetRef ref, NavigationState navigationState) {
+  Widget _buildMainContent(NavigationState navigationState) {
     switch (navigationState.selectedIndex) {
       case 0:
         return _buildHomeScreen();

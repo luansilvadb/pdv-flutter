@@ -6,16 +6,28 @@ import '../widgets/category_tabs.dart';
 import '../widgets/product_card.dart';
 import 'package:intl/intl.dart';
 
-class MenuScreen extends ConsumerWidget {
+class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends ConsumerState<MenuScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Carrega os produtos automaticamente quando a tela é inicializada
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(productsNotifierProvider.notifier).loadAvailableProducts();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final products = ref.watch(productsListProvider);
     final isLoading = ref.watch(isLoadingProductsProvider);
-    final error = ref.watch(productsErrorProvider);
-
-    return Container(
+    final error = ref.watch(productsErrorProvider);    return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,

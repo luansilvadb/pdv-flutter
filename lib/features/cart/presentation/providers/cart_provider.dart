@@ -76,8 +76,7 @@ class CartNotifier extends StateNotifier<CartState> {
         state = CartLoaded(cart);
       },
     );
-  }
-  /// Adiciona produto ao carrinho
+  }  /// Adiciona produto ao carrinho
   Future<void> addProduct({
     required String productId,
     required String productName,
@@ -90,8 +89,7 @@ class CartNotifier extends StateNotifier<CartState> {
       'Adicionando produto $productId ao carrinho (quantidade: ${qty.value})',
     );
 
-    final previousState = state;
-    state = CartItemAdding(productId);
+    // Não alteramos o estado para CartItemAdding para evitar flick
 
     final params = AddToCartParams(
       productId: productId,
@@ -105,8 +103,7 @@ class CartNotifier extends StateNotifier<CartState> {
     result.fold(
       (failure) {
         _logger.e('Erro ao adicionar produto: ${failure.message}');
-        state = previousState; // Reverte estado anterior
-        // Notifica erro sem alterar o estado principal
+        // Mantém o estado anterior, não faz alterações desnecessárias
         _showError(failure.message);
       },
       (cart) {
@@ -115,13 +112,11 @@ class CartNotifier extends StateNotifier<CartState> {
       },
     );
   }
-
   /// Remove produto completamente do carrinho
   Future<void> removeProduct(String productId) async {
     _logger.d('Removendo produto $productId do carrinho');
 
-    final previousState = state;
-    state = CartItemRemoving(productId);
+    // Não alteramos o estado para evitar flick
 
     final params = RemoveFromCartParams(productId: productId);
     final result = await _removeFromCart(params);
@@ -129,7 +124,6 @@ class CartNotifier extends StateNotifier<CartState> {
     result.fold(
       (failure) {
         _logger.e('Erro ao remover produto: ${failure.message}');
-        state = previousState;
         _showError(failure.message);
       },
       (cart) {
@@ -137,13 +131,11 @@ class CartNotifier extends StateNotifier<CartState> {
         state = CartLoaded(cart);
       },
     );
-  }
-  /// Atualiza quantidade de um produto
+  }  /// Atualiza quantidade de um produto
   Future<void> updateQuantity(String productId, Quantity quantity) async {
     _logger.d('Atualizando quantidade do produto $productId para ${quantity.value}');
 
-    final previousState = state;
-    state = CartItemUpdating(productId, quantity);
+    // Não alteramos o estado para evitar flick
 
     final params = UpdateQuantityParams(
       productId: productId,
@@ -154,7 +146,6 @@ class CartNotifier extends StateNotifier<CartState> {
     result.fold(
       (failure) {
         _logger.e('Erro ao atualizar quantidade: ${failure.message}');
-        state = previousState;
         _showError(failure.message);
       },
       (cart) {
@@ -184,20 +175,17 @@ class CartNotifier extends StateNotifier<CartState> {
       }
     }
   }
-
   /// Limpa todo o carrinho
   Future<void> clearCart() async {
     _logger.d('Limpando carrinho...');
 
-    final previousState = state;
-    state = const CartClearing();
+    // Não alteramos o estado para evitar flick
 
     final result = await _clearCart();
 
     result.fold(
       (failure) {
         _logger.e('Erro ao limpar carrinho: ${failure.message}');
-        state = previousState;
         _showError(failure.message);
       },
       (_) {
@@ -255,11 +243,7 @@ final currentCartProvider = Provider<CartEntity?>((ref) {
 /// Provider para verificar se carrinho está carregando
 final cartLoadingProvider = Provider<bool>((ref) {
   final cartState = ref.watch(cartProvider);
-  return cartState is CartLoading ||
-      cartState is CartItemAdding ||
-      cartState is CartItemRemoving ||
-      cartState is CartItemUpdating ||
-      cartState is CartClearing;
+  return cartState is CartLoading;
 });
 
 /// Provider para obter informações básicas do carrinho

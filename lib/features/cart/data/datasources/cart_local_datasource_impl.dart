@@ -17,7 +17,6 @@ class CartLocalDataSourceImpl implements CartLocalDataSource {
     required this.localStorage,
     required this.logger,
   });
-
   @override
   Future<CartModel?> getCart() async {
     try {
@@ -37,6 +36,12 @@ class CartLocalDataSourceImpl implements CartLocalDataSource {
 
       return cart;
     } catch (e, stackTrace) {
+      // Se é erro de chave não encontrada, retorna null ao invés de erro
+      if (e.toString().contains('Falha ao recuperar dados para a chave')) {
+        logger.d('Carrinho não existe ainda no storage (primeira vez)');
+        return null;
+      }
+      
       logger.e(
         'Erro ao buscar carrinho no storage local',
         error: e,
