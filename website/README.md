@@ -2,6 +2,8 @@
 
 This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
 
+> 🚀 **Documentação moderna com UI/UX aprimorada e deploy automatizado via GitHub Actions.**
+
 ## Installation
 
 ```bash
