@@ -7,6 +7,7 @@ import '../../features/cart/presentation/providers/cart_state.dart';
 import '../../features/cart/domain/entities/cart_entity.dart';
 import '../../features/orders/domain/entities/order_entity.dart';
 import '../../features/orders/presentation/providers/orders_provider.dart';
+import '../../shared/presentation/widgets/custom_toast.dart';
 
 /// Seção de checkout com totais e botão de finalização - MIGRADO
 ///
@@ -313,70 +314,37 @@ class CheckoutSection extends ConsumerWidget {
         ref.read(cartProvider.notifier).clearCart();        if (context.mounted) {
           Navigator.of(context).pop();
           
-          displayInfoBar(
+          // Usar o toast personalizado pequeno e no topo centro
+          showCustomToast(
             context,
-            builder: (context, close) => InfoBar(
-              title: Row(
-                children: [
-                  Icon(
-                    FluentIcons.completed,
-                    color: AppColors.success,
-                    size: AppSizes.iconSmall,
-                  ),
-                  const SizedBox(width: AppSizes.paddingSmall),
-                  const Text('Pedido Finalizado'),
-                ],
-              ),
-              content: Text('Pedido #${orderId.substring(orderId.length - 8)} criado com sucesso!'),
-              severity: InfoBarSeverity.success,
-              onClose: close,
-            ),
+            title: 'Pedido Finalizado',
+            message: 'Pedido #${orderId.substring(orderId.length - 8)} criado com sucesso!',
+            icon: FluentIcons.completed,
+            color: AppColors.success,
+            duration: const Duration(seconds: 4),
           );
         }
-      } else {
-        if (context.mounted) {
+      } else {        if (context.mounted) {
           Navigator.of(context).pop();
-          displayInfoBar(
+          showCustomToast(
             context,
-            builder: (context, close) => InfoBar(
-              title: Row(
-                children: [
-                  Icon(
-                    FluentIcons.error,
-                    color: AppColors.error,
-                    size: AppSizes.iconSmall,
-                  ),
-                  const SizedBox(width: AppSizes.paddingSmall),
-                  const Text('Erro'),
-                ],
-              ),
-              content: const Text('Não foi possível criar o pedido. Tente novamente.'),
-              severity: InfoBarSeverity.error,
-              onClose: close,
-            ),
+            title: 'Erro',
+            message: 'Não foi possível criar o pedido. Tente novamente.',
+            icon: FluentIcons.error,
+            color: AppColors.error,
+            duration: const Duration(seconds: 4),
           );
         }
       }
-    } catch (e) {
-      if (context.mounted) {
+    } catch (e) {      if (context.mounted) {
         Navigator.of(context).pop();
-        displayInfoBar(
+        showCustomToast(
           context,
-          builder: (context, close) => InfoBar(
-            title: Row(
-              children: [
-                Icon(
-                  FluentIcons.error,
-                  color: AppColors.error,
-                  size: AppSizes.iconSmall,
-                ),
-                const SizedBox(width: AppSizes.paddingSmall),
-                const Text('Erro Inesperado'),
-              ],
-            ),            content: Text('Erro: $e'),
-            severity: InfoBarSeverity.error,
-            onClose: close,
-          ),
+          title: 'Erro Inesperado',
+          message: 'Erro: $e',
+          icon: FluentIcons.error,
+          color: AppColors.error,
+          duration: const Duration(seconds: 4),
         );
       }
     }
