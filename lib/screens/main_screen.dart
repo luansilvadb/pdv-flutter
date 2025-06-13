@@ -5,6 +5,7 @@ import '../features/navigation/presentation/providers/navigation_provider.dart';
 import '../features/navigation/presentation/providers/navigation_state.dart';
 import '../features/cart/presentation/providers/cart_provider.dart';
 import '../screens/menu_screen.dart';
+import '../screens/orders/order_history_screen.dart';
 import '../widgets/cart_panel.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -476,14 +477,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       ),
     );
   }
-
   Widget _buildHistoryScreen() {
-    return _buildFeatureScreen(
-      FluentIcons.history,
-      'Histórico de Pedidos',
-      'Visualize pedidos anteriores aqui',
-      AppColors.secondaryAccent,
-    );
+    return const OrderHistoryScreen();
   }
 
   Widget _buildPromosScreen() {

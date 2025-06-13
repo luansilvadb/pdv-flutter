@@ -5,6 +5,8 @@ import '../../core/constants/app_constants.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
 import '../../features/cart/presentation/providers/cart_state.dart';
 import '../../features/cart/domain/entities/cart_entity.dart';
+import '../../features/orders/domain/entities/order_entity.dart';
+import '../../features/orders/presentation/providers/orders_provider.dart';
 
 /// Seção de checkout com totais e botão de finalização - MIGRADO
 ///
@@ -289,31 +291,95 @@ class CheckoutSection extends ConsumerWidget {
           ),
     );
   }
+  /// Confirma o pedido e exibe notificação de sucesso - MIGRADO: usar Riverpod + Orders
+  void _confirmOrder(BuildContext context, WidgetRef ref) async {
+    try {      // Criar o pedido a partir do carrinho
+      final orderId = 'order_${DateTime.now().millisecondsSinceEpoch}';
+      
+      final order = OrderEntity.fromCart(
+        id: orderId,
+        cartItems: currentCart.items,
+        subtotal: currentCart.subtotal,
+        tax: currentCart.tax,
+        total: currentCart.total,
+        paymentMethod: PaymentMethod.cash, // Padrão por enquanto
+        customerName: 'Cliente', // Padrão por enquanto
+      );
 
-  /// Confirma o pedido e exibe notificação de sucesso - MIGRADO: usar Riverpod
-  void _confirmOrder(BuildContext context, WidgetRef ref) {
-    // MIGRADO: Usar CartProvider Riverpod para limpar carrinho
-    ref.read(cartProvider.notifier).clearCart();
-    Navigator.of(context).pop();
-    displayInfoBar(
-      context,
-      builder:
-          (context, close) => InfoBar(
+      // Salvar o pedido no histórico
+      final success = await ref.read(ordersNotifierProvider.notifier).createOrder(order);
+      
+      if (success) {
+        // MIGRADO: Usar CartProvider Riverpod para limpar carrinho
+        ref.read(cartProvider.notifier).clearCart();        if (context.mounted) {
+          Navigator.of(context).pop();
+          
+          displayInfoBar(
+            context,
+            builder: (context, close) => InfoBar(
+              title: Row(
+                children: [
+                  Icon(
+                    FluentIcons.completed,
+                    color: AppColors.success,
+                    size: AppSizes.iconSmall,
+                  ),
+                  const SizedBox(width: AppSizes.paddingSmall),
+                  const Text('Pedido Finalizado'),
+                ],
+              ),
+              content: Text('Pedido #${orderId.substring(orderId.length - 8)} criado com sucesso!'),
+              severity: InfoBarSeverity.success,
+              onClose: close,
+            ),
+          );
+        }
+      } else {
+        if (context.mounted) {
+          Navigator.of(context).pop();
+          displayInfoBar(
+            context,
+            builder: (context, close) => InfoBar(
+              title: Row(
+                children: [
+                  Icon(
+                    FluentIcons.error,
+                    color: AppColors.error,
+                    size: AppSizes.iconSmall,
+                  ),
+                  const SizedBox(width: AppSizes.paddingSmall),
+                  const Text('Erro'),
+                ],
+              ),
+              content: const Text('Não foi possível criar o pedido. Tente novamente.'),
+              severity: InfoBarSeverity.error,
+              onClose: close,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        displayInfoBar(
+          context,
+          builder: (context, close) => InfoBar(
             title: Row(
               children: [
                 Icon(
-                  FluentIcons.completed,
-                  color: AppColors.success,
+                  FluentIcons.error,
+                  color: AppColors.error,
                   size: AppSizes.iconSmall,
                 ),
                 const SizedBox(width: AppSizes.paddingSmall),
-                const Text('Pedido Finalizado'),
+                const Text('Erro Inesperado'),
               ],
-            ),
-            content: const Text('Seu pedido foi processado com sucesso!'),
-            severity: InfoBarSeverity.success,
+            ),            content: Text('Erro: $e'),
+            severity: InfoBarSeverity.error,
             onClose: close,
           ),
-    );
+        );
+      }
+    }
   }
 }

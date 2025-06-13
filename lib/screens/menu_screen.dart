@@ -15,33 +15,39 @@ class MenuScreen extends ConsumerStatefulWidget {
 }
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
+  bool _hasInitialized = false;
+
   @override
   void initState() {
     super.initState();
     // Carrega os produtos e categorias automaticamente quando a tela é inicializada
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(productsNotifierProvider.notifier).loadAvailableProducts();
-      ref.read(categoriesNotifierProvider.notifier).loadCategories();
+      if (!_hasInitialized) {
+        ref.read(productsNotifierProvider.notifier).loadAvailableProducts();
+        ref.read(categoriesNotifierProvider.notifier).loadCategories();
+        _hasInitialized = true;
+      }
     });
-  }
-  @override
+  }@override
   Widget build(BuildContext context) {
     final products = ref.watch(productsListProvider);
     final isLoading = ref.watch(isLoadingProductsProvider);
-    final error = ref.watch(productsErrorProvider);
-    
-    // React to category selection changes
+    final error = ref.watch(productsErrorProvider);    // React to category selection changes - sem loading desnecessário
     ref.listen<String?>(selectedCategoryIdProvider, (previous, next) {
       if (previous != next) {
-        if (next == null) {
+        final currentState = ref.read(productsNotifierProvider);
+        // Evita recarregar se está voltando para a mesma categoria
+        if (next == null && currentState.selectedCategoryId != null) {
           // Se nenhuma categoria selecionada, carrega todos os produtos
           ref.read(productsNotifierProvider.notifier).loadAvailableProducts();
-        } else {
-          // Se categoria selecionada, filtra produtos por categoria
+        } else if (next != null && currentState.selectedCategoryId != next) {
+          // Se categoria selecionada diferente, filtra produtos por categoria
           ref.read(productsNotifierProvider.notifier).loadProductsByCategory(next);
         }
       }
-    });return Container(
+    });
+
+    return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -54,8 +60,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
         ),
       ),
       child: Column(
-        children: [
-          // Enhanced Header
+        children: [          // Enhanced Header
           _buildEnhancedHeader(context, ref),
 
           // Enhanced Category Tabs
@@ -64,10 +69,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           // Quick Filters for search
           _buildQuickFilters(ref),
 
-          // Enhanced Products Grid
+          // Enhanced Products Grid - sem loading bloqueante
           Expanded(
-            child: _buildContent(context, ref, products, isLoading, error),
-          ),
+            child: _buildContent(context, ref, products, isLoading, error),          ),
         ],
       ),
     );
@@ -80,19 +84,66 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     bool isLoading,
     String? error,
   ) {
-    if (isLoading) {
-      return const Center(child: ProgressRing());
-    }
-
+    // Se há erro, sempre mostra o erro
     if (error != null) {
       return _buildErrorState(error);
     }
 
+    // Se está carregando E não há produtos ainda, mostra loading
+    if (isLoading && products.isEmpty) {
+      return const Center(child: ProgressRing());
+    }
+
+    // Se não há produtos (e não está carregando), mostra estado vazio
     if (products.isEmpty) {
       return _buildEnhancedEmptyState(context, ref);
     }
 
-    return _buildEnhancedProductsGrid(context, ref, products);
+    // Sempre mostra produtos se existem, mesmo durante loading
+    return Stack(
+      children: [
+        _buildEnhancedProductsGrid(context, ref, products),
+        // Indicador sutil de loading no canto superior direito
+        if (isLoading)
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceElevated.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowLight,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: ProgressRing(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Atualizando...',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   Widget _buildErrorState(String error) {
@@ -599,8 +650,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 ),
               ),
             ],
-          ),
-        ),
+          ),        ),
       ),
     );
   }

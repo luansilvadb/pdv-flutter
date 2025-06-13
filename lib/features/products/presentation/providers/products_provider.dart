@@ -45,10 +45,12 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
     this._filterProductsByCategory,
     this._searchProducts,
   ) : super(const ProductsState());
-
   /// Carrega produtos disponíveis
   Future<void> loadAvailableProducts() async {
-    state = state.copyWith(isLoading: true, error: null);
+    // Só mostra loading se não há produtos ainda
+    if (state.products.isEmpty) {
+      state = state.copyWith(isLoading: true, error: null);
+    }
 
     final result = await _getAvailableProducts();
 
@@ -64,10 +66,12 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
           ),
     );
   }
-
   /// Carrega produtos por categoria
   Future<void> loadProductsByCategory(String categoryId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    // Só mostra loading se não há produtos ou está mudando categoria
+    if (state.products.isEmpty || state.selectedCategoryId != categoryId) {
+      state = state.copyWith(isLoading: true, error: null);
+    }
 
     final params = FilterProductsByCategoryParams(categoryId: categoryId);
     final result = await _filterProductsByCategory(params);
@@ -84,10 +88,12 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
           ),
     );
   }
-
   /// Busca produtos por query
   Future<void> searchProducts(String query) async {
-    state = state.copyWith(isLoading: true, error: null);
+    // Só mostra loading se não há produtos ainda
+    if (state.products.isEmpty) {
+      state = state.copyWith(isLoading: true, error: null);
+    }
 
     final params = SearchProductsParams(query: query);
     final result = await _searchProducts(params);

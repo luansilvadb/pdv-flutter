@@ -26,6 +26,14 @@ import '../../features/cart/domain/usecases/update_cart_item_quantity.dart';
 import '../../features/cart/domain/usecases/get_cart.dart';
 import '../../features/cart/domain/usecases/clear_cart.dart';
 
+// Orders feature imports
+import '../../features/orders/data/datasources/order_local_data_source.dart';
+import '../../features/orders/data/repositories/order_repository_impl.dart';
+import '../../features/orders/domain/repositories/order_repository.dart';
+import '../../features/orders/domain/usecases/create_order.dart';
+import '../../features/orders/domain/usecases/get_all_orders.dart';
+import '../../features/orders/domain/usecases/get_orders_by_date_range.dart';
+
 /// Service Locator global
 final sl = GetIt.instance;
 
@@ -82,6 +90,7 @@ Future<void> _initExternal() async {
 Future<void> _initFeatures() async {
   await _initProductsFeature();
   await _initCartFeature();
+  await _initOrdersFeature();
 }
 
 /// Inicializa dependências do módulo Products
@@ -129,8 +138,27 @@ Future<void> _initCartFeature() async {
   );
 
   sl.registerLazySingleton<GetCart>(() => GetCart(sl()));
-
   sl.registerLazySingleton<ClearCart>(() => ClearCart(sl()));
+}
+
+/// Inicializa dependências do módulo Orders
+Future<void> _initOrdersFeature() async {
+  // Data sources
+  sl.registerLazySingleton<OrderLocalDataSource>(
+    () => OrderLocalDataSourceImpl(localStorage: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<OrderRepository>(
+    () => OrderRepositoryImpl(localDataSource: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton<CreateOrder>(() => CreateOrder(sl()));
+  
+  sl.registerLazySingleton<GetAllOrders>(() => GetAllOrders(sl()));
+  
+  sl.registerLazySingleton<GetOrdersByDateRange>(() => GetOrdersByDateRange(sl()));
 }
 
 /// Limpa todas as dependências (usado para testes)
