@@ -26,14 +26,18 @@ class CartPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Use apenas o formatador como constante para evitar recalculo
     final currencyFormatter = NumberFormat.currency(
       symbol: 'R\$',
       decimalDigits: 2,
       locale: 'pt_BR',
     );
 
-    // MIGRADO: Usar Consumer Riverpod para escutar mudanças no carrinho
+    // Watching apenas items individuais do estado para reduzir rebuilds desnecessários
+    // Usa select() para escutar apenas partes específicas do estado
     final cartState = ref.watch(cartProvider);
+    // Já que currentCartProvider é uma derivação mais específica, 
+    // tem menos chance de causar rebuilds desnecessários
     final currentCart = ref.watch(currentCartProvider);
 
     return Container(

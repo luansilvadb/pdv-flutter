@@ -13,6 +13,8 @@ class NavigationNotifier extends StateNotifier<NavigationState> {
 
   /// Define o índice da tela selecionada
   void setSelectedIndex(int index) {
+    // Evita rebuilds desnecessários se o índice já for o atual
+    if (state.selectedIndex == index) return;
     state = state.copyWith(selectedIndex: index);
   }
 

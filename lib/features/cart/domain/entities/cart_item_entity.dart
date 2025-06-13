@@ -47,6 +47,19 @@ class CartItemEntity extends Equatable {
     );
   }
 
+  /// Método factory para criar uma instância vazia do CartItemEntity
+  /// Útil para casos onde precisamos de um valor padrão
+  factory CartItemEntity.empty() {
+    return CartItemEntity(
+      id: '',
+      productId: '',
+      productName: '',
+      price: Money(0),
+      productImageUrl: '',
+      quantity: Quantity(0),
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,

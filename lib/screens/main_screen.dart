@@ -333,20 +333,18 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildMainContent(NavigationState navigationState) {
-    switch (navigationState.selectedIndex) {
-      case 0:
-        return _buildHomeScreen();
-      case 1:
-        return _buildMenuWithCart(); // AQUI ESTÁ A CORREÇÃO!
-      case 2:
-        return _buildHistoryScreen();
-      case 3:
-        return _buildPromosScreen();
-      case 4:
-        return _buildSettingsScreen();
-      default:
-        return _buildMenuWithCart();
-    }
+    // Usando IndexedStack para preservar o estado das telas
+    // e evitar recriá-las a cada mudança de navegação
+    return IndexedStack(
+      index: navigationState.selectedIndex,
+      children: [
+        _buildHomeScreen(),
+        _buildMenuWithCart(),
+        _buildHistoryScreen(),
+        _buildPromosScreen(),
+        _buildSettingsScreen(),
+      ],
+    );
   }
 
   // NOVA FUNÇÃO QUE INCLUI O CARTPANEL

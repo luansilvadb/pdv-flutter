@@ -197,100 +197,360 @@ class CheckoutSection extends ConsumerWidget {
   void _showCheckoutDialog(BuildContext context, WidgetRef ref, double total) {
     showDialog(
       context: context,
-      builder:
-          (context) => ContentDialog(
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryAccent.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
-                  ),
-                  child: Icon(
-                    FluentIcons.print,
-                    color: AppColors.primaryAccent,
-                    size: AppSizes.iconSmall,
-                  ),
+      builder: (context) => ContentDialog(
+        title: null, // Removendo o título padrão para usar um header customizado
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header customizado com gradiente
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSizes.paddingLarge),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primaryAccent.withValues(alpha: 0.15),
+                    AppColors.primaryAccent.withValues(alpha: 0.05),
+                  ],
                 ),
-                const SizedBox(width: AppSizes.paddingMedium),
-                const Text('Finalizar Pedido'),
-              ],
+                borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+                border: Border.all(
+                  color: AppColors.primaryAccent.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.primaryAccent.withValues(alpha: 0.3),
+                          AppColors.primaryAccent,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryAccent.withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      FluentIcons.payment_card,
+                      color: Colors.white,
+                      size: AppSizes.iconMedium,
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.paddingMedium),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Finalizar Pedido',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Confirme os detalhes para concluir',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            content: Container(
+            
+            const SizedBox(height: AppSizes.paddingLarge),
+            
+            // Resumo do pedido com card elevado
+            Container(
               padding: const EdgeInsets.all(AppSizes.paddingMedium),
               decoration: BoxDecoration(
-                color: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                color: AppColors.surfaceContainer,
                 borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+                border: Border.all(
+                  color: AppColors.border.withValues(alpha: 0.2),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowLight,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        FluentIcons.money,
-                        color: AppColors.priceColor,
-                        size: AppSizes.iconSmall,
-                      ),
-                      const SizedBox(width: AppSizes.paddingSmall),
-                      Text(
-                        'Total do pedido: ${currencyFormatter.format(total)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.priceColor,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'Resumo do Pedido',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: AppSizes.paddingMedium),
+                  
+                  // Detalhes do pedido
+                  _buildDetailRow(
+                    FluentIcons.shopping_cart,
+                    '${currentCart.itemCount} ${currentCart.itemCount == 1 ? 'item' : 'itens'} no carrinho',
+                    AppColors.textSecondary,
+                  ),
+                  const SizedBox(height: AppSizes.paddingSmall),
+                  _buildDetailRow(
+                    FluentIcons.money,
+                    'Subtotal: ${currencyFormatter.format(currentCart.subtotal.value)}',
+                    AppColors.textSecondary,
+                  ),
+                  const SizedBox(height: AppSizes.paddingSmall),                  _buildDetailRow(
+                    FluentIcons.calculator_multiply,
+                    'Taxa (10%): ${currencyFormatter.format(currentCart.tax.value)}',
+                    AppColors.textSecondary,
+                  ),
+                  
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSizes.paddingSmall),
+                    child: Divider(),
+                  ),
+                  
+                  // Total com destaque
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        FluentIcons.shopping_cart,
-                        color: AppColors.textSecondary,
-                        size: AppSizes.iconSmall,
-                      ),
-                      const SizedBox(width: AppSizes.paddingSmall),
                       Text(
-                        '${currentCart.itemCount} ${currentCart.itemCount == 1 ? 'item' : 'itens'} no carrinho',
-                        style: TextStyle(color: AppColors.textSecondary),
+                        'Total',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.paddingMedium,
+                          vertical: AppSizes.paddingSmall,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.primaryAccent.withValues(alpha: 0.2),
+                              AppColors.primaryAccent.withValues(alpha: 0.1),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+                        ),
+                        child: Text(
+                          currencyFormatter.format(total),
+                          style: TextStyle(
+                            color: AppColors.primaryAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            actions: [
-              Button(
-                child: const Text('Cancelar'),
-                onPressed: () => Navigator.of(context).pop(),
+            
+            const SizedBox(height: AppSizes.paddingLarge),
+            
+            // Métodos de pagamento (simulação para design)
+            Text(
+              'Forma de Pagamento',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
               ),
-              FilledButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(
-                    AppColors.primaryAccent,
+            ),
+            const SizedBox(height: AppSizes.paddingSmall),
+            Container(
+              padding: const EdgeInsets.all(AppSizes.paddingSmall),
+              decoration: BoxDecoration(
+                color: AppColors.primaryAccent.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+                border: Border.all(
+                  color: AppColors.primaryAccent.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                children: [                  RadioButton(
+                    checked: true,
+                    onChanged: (_) {},
+                  ),
+                  Icon(
+                    FluentIcons.money,
+                    size: AppSizes.iconSmall,
+                    color: AppColors.success,
+                  ),
+                  const SizedBox(width: AppSizes.paddingSmall),
+                  Text(
+                    'Dinheiro',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),            ),
+          ],
+        ),
+        actions: [
+          // SizedBox para envolver os botões e evitar o overflow (seguindo as boas práticas)
+          SizedBox(
+            width: double.infinity,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // Utilizando Expanded com flexFactor para garantir que os botões tenham o mesmo tamanho
+                Expanded(
+                  child: Button(
+                    style: ButtonStyle(
+                      padding: WidgetStateProperty.all(
+                        const EdgeInsets.symmetric(
+                          horizontal: AppSizes.paddingSmall,
+                          vertical: AppSizes.paddingSmall,
+                        ),
+                      ),
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.pressed)) {
+                          return AppColors.surfaceVariant.withValues(alpha: 0.5);
+                        }
+                        if (states.contains(WidgetState.hovered)) {
+                          return AppColors.surfaceVariant.withValues(alpha: 0.3);
+                        }
+                        return AppColors.surfaceVariant.withValues(alpha: 0.1);
+                      }),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // Centraliza o conteúdo
+                      children: [
+                        Icon(
+                          FluentIcons.cancel,
+                          size: AppSizes.iconSmall,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: AppSizes.paddingSmall),
+                        // Flexible para permitir quebra de texto se necessário
+                        Flexible(
+                          child: Text(
+                            'Cancelar',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      FluentIcons.accept,
-                      color: Colors.white,
-                      size: AppSizes.iconSmall,
+                
+                // Espaçamento entre os botões
+                const SizedBox(width: AppSizes.paddingSmall),
+                
+                // Botão de confirmar com o mesmo tamanho usando Expanded
+                Expanded(
+                  child: FilledButton(
+                    style: ButtonStyle(
+                      padding: WidgetStateProperty.all(
+                        const EdgeInsets.symmetric(
+                          horizontal: AppSizes.paddingSmall,
+                          vertical: AppSizes.paddingSmall,
+                        ),
+                      ),
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.pressed)) {
+                          return AppColors.primaryAccentPressed;
+                        }
+                        if (states.contains(WidgetState.hovered)) {
+                          return AppColors.primaryAccentHover;
+                        }
+                        return AppColors.primaryAccent;
+                      }),
                     ),
-                    const SizedBox(width: AppSizes.paddingSmall),
-                    const Text('Confirmar Pedido'),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // Centraliza o conteúdo
+                      children: [
+                        Icon(
+                          FluentIcons.check_mark,
+                          size: AppSizes.iconSmall,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: AppSizes.paddingSmall),
+                        // Flexible para permitir quebra de texto se necessário
+                        Flexible(
+                          child: Text(
+                            'Confirmar Pedido', 
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onPressed: () => _confirmOrder(context, ref),
+                  ),
                 ),
-                onPressed: () => _confirmOrder(context, ref),
-              ),
-            ],
+              ],
+            ),
           ),
+        ],
+      ),
     );
   }
+  
+  // Método auxiliar para construir linhas de detalhes no modal
+  Widget _buildDetailRow(IconData icon, String text, Color color) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: AppSizes.iconSmall,
+          color: color,
+        ),
+        const SizedBox(width: AppSizes.paddingSmall),
+        Text(
+          text,
+          style: TextStyle(
+            color: color,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
   /// Confirma o pedido e exibe notificação de sucesso - MIGRADO: usar Riverpod + Orders
   void _confirmOrder(BuildContext context, WidgetRef ref) async {
     try {      // Criar o pedido a partir do carrinho

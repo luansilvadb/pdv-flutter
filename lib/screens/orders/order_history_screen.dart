@@ -25,14 +25,29 @@ class OrderHistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
+  bool _hasInitialized = false;
+  // Controlador para manter o estado de scroll
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    // Carrega os pedidos automaticamente quando a tela é inicializada
+    // Carrega os pedidos apenas uma vez quando a tela é inicializada
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(ordersNotifierProvider.notifier).loadAllOrders();
+      if (!_hasInitialized) {
+        ref.read(ordersNotifierProvider.notifier).loadAllOrders();
+        _hasInitialized = true;
+      }
     });
-  }  @override
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final orders = ref.watch(ordersListProvider);
     final isLoading = ref.watch(isLoadingOrdersProvider);
@@ -49,11 +64,11 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
             AppColors.background.withValues(alpha: 0.95),
             AppColors.surfaceVariant.withValues(alpha: 0.1),
           ],
-        ),
-      ),
+        ),      ),
       // Toda a tela agora é scrollável
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
+        controller: _scrollController,
         child: ConstrainedBox(
           constraints: BoxConstraints(
             minHeight: screenHeight,
@@ -64,7 +79,9 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
         ),
       ),
     );
-  }Widget _buildCompactLayout(
+  }
+  
+  Widget _buildCompactLayout(
     BuildContext context,
     List<OrderEntity> orders,
     bool isLoading,
@@ -82,8 +99,8 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
         // Orders Content - agora não usa Expanded
         _buildContent(context, orders, isLoading, error),
       ],
-    );
-  }
+    );  }
+  
   Widget _buildNormalLayout(
     BuildContext context,
     List<OrderEntity> orders,

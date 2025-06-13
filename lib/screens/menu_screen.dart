@@ -16,19 +16,31 @@ class MenuScreen extends ConsumerStatefulWidget {
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
   bool _hasInitialized = false;
+  // Controlador para manter o estado de scroll
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    // Carrega os produtos e categorias automaticamente quando a tela é inicializada
+    // Carrega os produtos e categorias apenas uma vez
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_hasInitialized) {
+        // Use um AutoDispose provider para produtos e categorias para
+        // que sejam mantidos enquanto a tela estiver visível
         ref.read(productsNotifierProvider.notifier).loadAvailableProducts();
         ref.read(categoriesNotifierProvider.notifier).loadCategories();
         _hasInitialized = true;
       }
     });
-  }@override
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final products = ref.watch(productsListProvider);
     final isLoading = ref.watch(isLoadingProductsProvider);
@@ -102,7 +114,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     // Sempre mostra produtos se existem, mesmo durante loading
     return Stack(
       children: [
-        _buildEnhancedProductsGrid(context, ref, products),
+        _buildProductsGrid(products),
         // Indicador sutil de loading no canto superior direito
         if (isLoading)
           Positioned(
@@ -463,45 +475,37 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     );
   }
 
-  Widget _buildEnhancedProductsGrid(
-    BuildContext context,
-    WidgetRef ref,
-    List products,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.topCenter,
-          radius: 2.0,
-          colors: [
-            AppColors.surfaceVariant.withValues(alpha: 0.05),
-            AppColors.background,
-          ],
-        ),
-      ),
-      child: GridView.builder(
-        padding: const EdgeInsets.all(AppSizes.paddingLarge),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: _calculateCrossAxisCount(context),
-          childAspectRatio: 0.8,
-          crossAxisSpacing: AppSizes.paddingMedium,
-          mainAxisSpacing: AppSizes.paddingMedium,
-        ),
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          final product = products[index];
-          return ProductCard(product: product);
-        },
-      ),
+  // Método otimizado para construir o grid de produtos
+  Widget _buildProductsGrid(List products) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calcular número de colunas com base na largura disponível
+        final double itemWidth = 200; // Largura desejada para cada item
+        final int crossAxisCount = (constraints.maxWidth / itemWidth).floor();
+        
+        return GridView.builder(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(AppSizes.paddingMedium),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount > 0 ? crossAxisCount : 1,
+            childAspectRatio: 0.7,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+          ),
+          // Usar valor de key único para cada produto para manter estado dos widgets
+          // Isso evita reconstruções desnecessárias e melhora bastante a performance
+          itemBuilder: (context, index) => ProductCard(
+            product: products[index],
+            key: ValueKey('product-${products[index].id}'),
+          ),
+          itemCount: products.length,
+          // Usar AlwaysScrollableScrollPhysics para melhorar a experiência de scroll
+          physics: const AlwaysScrollableScrollPhysics(),
+          // Usar cache para os itens que saem da tela
+          cacheExtent: 500,
+        );
+      }
     );
-  }
-
-  int _calculateCrossAxisCount(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (AppBreakpoints.isMobile(width)) return 1;
-    if (AppBreakpoints.isTablet(width)) return 2;
-    if (AppBreakpoints.isDesktop(width)) return 3;
-    return 4; // Desktop large
   }
 
   Widget _buildEnhancedEmptyState(BuildContext context, WidgetRef ref) {
