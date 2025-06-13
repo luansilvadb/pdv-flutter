@@ -23,3 +23,12 @@ slorber:
     linkedin: sebastienlorber
     github: slorber
     newsletter: https://thisweekinreact.com
+
+luansilva:
+  name: Luan Silva
+  title: Desenvolvedor Flutter & Arquiteto de Software
+  url: https://github.com/luansilvadb
+  image_url: https://github.com/luansilvadb.png
+  page: true
+  socials:
+    github: luansilvadb
