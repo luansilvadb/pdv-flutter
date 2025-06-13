@@ -1,3 +1,4 @@
+// Homepage principal do PDV Restaurant
 import type {ReactNode} from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
