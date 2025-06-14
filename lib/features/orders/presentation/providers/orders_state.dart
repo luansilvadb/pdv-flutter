@@ -4,12 +4,14 @@ import '../../domain/entities/order_entity.dart';
 /// Estado dos pedidos no sistema
 class OrdersState extends Equatable {
   final List<OrderEntity> orders;
+  final List<OrderEntity> allOrders;
   final bool isLoading;
   final String? error;
   final Map<String, dynamic>? statistics;
 
   const OrdersState({
     this.orders = const [],
+    this.allOrders = const [],
     this.isLoading = false,
     this.error,
     this.statistics,
@@ -18,12 +20,14 @@ class OrdersState extends Equatable {
   /// Cria uma cópia do estado com novos valores
   OrdersState copyWith({
     List<OrderEntity>? orders,
+    List<OrderEntity>? allOrders,
     bool? isLoading,
     String? error,
     Map<String, dynamic>? statistics,
   }) {
     return OrdersState(
       orders: orders ?? this.orders,
+      allOrders: allOrders ?? this.allOrders,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       statistics: statistics ?? this.statistics,
@@ -56,11 +60,12 @@ class OrdersState extends Equatable {
       orders.fold(0.0, (sum, order) => sum + order.total.value);
 
   @override
-  List<Object?> get props => [orders, isLoading, error, statistics];
+  List<Object?> get props => [orders, allOrders, isLoading, error, statistics];
 
   @override
   String toString() => 'OrdersState('
       'orders: ${orders.length}, '
+      'allOrders: ${allOrders.length}, '
       'isLoading: $isLoading, '
       'error: $error'
       ')';

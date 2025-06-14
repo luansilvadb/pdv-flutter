@@ -36,6 +36,7 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
         state = state.copyWith(
           isLoading: false,
           orders: orders,
+          allOrders: orders,
           error: null,
         );
       },
@@ -95,14 +96,12 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
   void filterOrdersByStatus(OrderStatus? status) {
     if (status == null) {
       // Se status é null, mostra todos os pedidos
-      loadAllOrders();
+      state = state.copyWith(orders: state.allOrders);
       return;
     }
-
-    final filteredOrders = state.orders
+    final filteredOrders = state.allOrders
         .where((order) => order.status == status)
         .toList();
-
     state = state.copyWith(orders: filteredOrders);
   }
 
