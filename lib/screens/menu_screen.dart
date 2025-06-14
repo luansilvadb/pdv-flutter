@@ -349,8 +349,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   }
 
   Widget _buildEnhancedSearchBar(WidgetRef ref) {
-    // Funcionalidade de busca será implementada em versões futuras
-
     return Container(
       height: 56,
       decoration: BoxDecoration(
@@ -379,7 +377,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       child: TextBox(
         placeholder: 'Busque por pratos, bebidas ou categorias...',
         onChanged: (value) {
-          // Busca será implementada em versões futuras
+          ref.read(productsNotifierProvider.notifier).searchProducts(value);
         },
         prefix: AnimatedContainer(
           duration: AppSizes.animationMedium,
@@ -449,12 +447,11 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           letterSpacing: 0.3,
           height: 1.4,
         ),
-        placeholderStyle: TextStyle(
-          color: AppColors.textTertiary,
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
-          letterSpacing: 0.2,
-        ),
+        cursorColor: AppColors.primaryAccent,
+        cursorWidth: 2.0,
+        autofocus: false,
+        padding: const EdgeInsets.symmetric(horizontal: 0),
+        decoration: null,
       ),
     );
   }
