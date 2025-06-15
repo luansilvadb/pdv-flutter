@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/receipt_entity.dart';
 import 'pdf_generator.dart';
 
@@ -42,26 +43,32 @@ class PrintingServiceImpl implements PrintingService {
       rethrow;
     }
   }
-
   @override
   Future<String> saveReceiptPdf(ReceiptEntity receipt, String directoryPath) async {
     final pdfBytes = await pdfGenerator.generateReceiptPdf(receipt);
     
-    // Cria o diretório se não existir
-    final directory = Directory(directoryPath);
-    if (!await directory.exists()) {
-      await directory.create(recursive: true);
+    if (kIsWeb) {
+      // Para web, retorna um indicativo de sucesso
+      // O download será gerenciado pelo navegador via url_launcher
+      return 'PDF preparado para download';
+    } else {
+      // Lógica para dispositivos móveis e desktop
+      // Cria o diretório se não existir
+      final directory = Directory(directoryPath);
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+      
+      // Define o nome do arquivo
+      final fileName = 'Cupom_Fiscal_${receipt.receiptNumber}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final filePath = '$directoryPath/$fileName';
+      
+      // Salva o arquivo
+      final file = File(filePath);
+      await file.writeAsBytes(pdfBytes);
+      
+      return filePath;
     }
-    
-    // Define o nome do arquivo
-    final fileName = 'Cupom_Fiscal_${receipt.receiptNumber}_${DateTime.now().millisecondsSinceEpoch}.pdf';
-    final filePath = '$directoryPath/$fileName';
-    
-    // Salva o arquivo
-    final file = File(filePath);
-    await file.writeAsBytes(pdfBytes);
-    
-    return filePath;
   }
 
   @override

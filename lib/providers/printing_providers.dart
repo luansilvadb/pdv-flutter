@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/dependency_injection.dart';
 import '../features/printing/domain/usecases/generate_receipt_pdf.dart';
 import '../features/printing/domain/usecases/generate_pdf_bytes.dart';
-import '../features/printing/domain/usecases/print_receipt.dart';
 import '../features/printing/domain/usecases/save_receipt_pdf.dart';
 import '../features/printing/presentation/providers/printing_provider.dart';
 import '../features/printing/presentation/providers/printing_state.dart';
@@ -12,7 +11,6 @@ final printingProvider = StateNotifierProvider<PrintingNotifier, PrintingState>(
   return PrintingNotifier(
     generateReceiptPdf: sl<GenerateReceiptPdf>(),
     generatePdfBytes: sl<GeneratePdfBytes>(),
-    printReceipt: sl<PrintReceipt>(),
     saveReceiptPdf: sl<SaveReceiptPdf>(),
     logger: sl(),
   );

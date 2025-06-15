@@ -456,8 +456,7 @@ class OrderCard extends ConsumerWidget {
           ],
         ),
         content: const Text('Escolha onde deseja salvar o PDF do cupom fiscal:'),
-        actions: [
-          Row(
+        actions: [          Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               // Botão Cancelar
@@ -468,59 +467,29 @@ class OrderCard extends ConsumerWidget {
                 ),
               ),
               
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               
-              // Botão Pasta Padrão
+              // Botão Imprimir no Navegador
               Expanded(
-                child: Button(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(AppColors.surfaceVariant),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(FluentIcons.folder, size: 16, color: AppColors.textSecondary),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Pasta Padrão',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    ref.read(printingProvider.notifier).saveOrderReceiptPdf(order);
-                  },
-                ),
-              ),
-              
-              const SizedBox(width: 8),
-              
-              // Botão Escolher Pasta
-              Expanded(
+                flex: 2,
                 child: FilledButton(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(FluentIcons.folder_open, size: 16, color: Colors.white),
+                      Icon(FluentIcons.print, size: 16, color: Colors.white),
                       const SizedBox(height: 4),
                       Text(
-                        'Escolher Pasta',
+                        'Imprimir no Navegador',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 11,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                    ],
-                  ),
+                    ],                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
-                    ref.read(printingProvider.notifier).saveOrderReceiptPdfWithPicker(order);
+                    ref.read(printingProvider.notifier).printOrderReceiptInBrowser(order);
                   },
                 ),
               ),

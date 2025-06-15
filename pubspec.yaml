@@ -34,15 +34,19 @@ dependencies:
   # 🛠️ Utilities
   intl: ^0.20.2
     # 📊 Logging
-  logger: ^2.0.2+1
-  # 📄 PDF Generation
+  logger: ^2.0.2+1  # 📄 PDF Generation
   pdf: ^3.10.4
   printing: ^5.11.0
   path_provider: ^2.1.2
+  path_provider_windows: ^2.3.0
   file_picker: ^8.1.6
-  
-  # 📄 PDF Viewer
+    # 📄 PDF Viewer
   pdfx: ^2.6.0
+    # 🌐 URL Launcher
+  url_launcher: ^6.2.2
+  
+  # 🌐 Web APIs (para web-only)
+  web: ^1.0.0
 
 dev_dependencies:
   # 🧪 Testing

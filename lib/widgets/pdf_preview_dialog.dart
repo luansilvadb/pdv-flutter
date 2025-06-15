@@ -312,56 +312,9 @@ class _PdfPreviewDialogState extends ConsumerState<PdfPreviewDialog> {
           // Espaçamento entre os botões
           const SizedBox(width: AppSizes.paddingSmall),
           
-          // Botão Salvar PDF - com estilo secundário
+          // Botão Imprimir no Navegador - botão primário principal
           Expanded(
-            child: Button(
-              style: ButtonStyle(
-                padding: WidgetStateProperty.all(
-                  const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingSmall,
-                    vertical: AppSizes.paddingSmall,
-                  ),
-                ),
-                backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-                  if (states.contains(WidgetState.pressed)) {
-                    return AppColors.secondaryAccent.withValues(alpha: 0.8);
-                  }
-                  if (states.contains(WidgetState.hovered)) {
-                    return AppColors.secondaryAccent.withValues(alpha: 0.9);
-                  }
-                  return AppColors.secondaryAccent;
-                }),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    FluentIcons.save,
-                    size: AppSizes.iconSmall,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: AppSizes.paddingSmall),
-                  Flexible(
-                    child: Text(
-                      'Salvar PDF',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              onPressed: () => _savePdf(),
-            ),
-          ),
-          
-          // Espaçamento entre os botões
-          const SizedBox(width: AppSizes.paddingSmall),
-          
-          // Botão Imprimir - botão primário principal
-          Expanded(
+            flex: 2,
             child: FilledButton(
               style: ButtonStyle(
                 padding: WidgetStateProperty.all(
@@ -391,7 +344,7 @@ class _PdfPreviewDialogState extends ConsumerState<PdfPreviewDialog> {
                   const SizedBox(width: AppSizes.paddingSmall),
                   Flexible(
                     child: Text(
-                      'Imprimir',
+                      'Imprimir no Navegador',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -401,96 +354,16 @@ class _PdfPreviewDialogState extends ConsumerState<PdfPreviewDialog> {
                   ),
                 ],
               ),
-              onPressed: () => _printPdf(),
+              onPressed: () => _printInBrowser(),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-  void _savePdf() {
-    // Exibe menu de opções para salvar
-    _showSaveOptionsDialog();
-  }
-
-  void _showSaveOptionsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => ContentDialog(
-        title: Row(
-          children: [
-            Icon(FluentIcons.save, color: AppColors.secondaryAccent),
-            const SizedBox(width: 8),
-            const Text('Salvar PDF'),
-          ],
-        ),
-        content: const Text('Escolha onde deseja salvar o PDF do cupom fiscal:'),        actions: [
-          // Cancelar
-          Button(
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          // Pasta Padrão
-          Button(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(AppColors.surfaceVariant),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(FluentIcons.folder, size: 14, color: AppColors.textSecondary),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    'Pasta Padrão',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 12,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            onPressed: () {
-              Navigator.of(context).pop(); // Fecha o diálogo de opções
-              ref.read(printingProvider.notifier).saveOrderReceiptPdf(widget.receipt.order);
-              Navigator.of(context).pop(); // Fecha o diálogo do PDF
-            },
-          ),
-          // Escolher Pasta
-          FilledButton(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(FluentIcons.folder_open, size: 14, color: Colors.white),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    'Escolher Pasta',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            onPressed: () {
-              Navigator.of(context).pop(); // Fecha o diálogo de opções
-              ref.read(printingProvider.notifier).saveOrderReceiptPdfWithPicker(widget.receipt.order);
-              Navigator.of(context).pop(); // Fecha o diálogo do PDF
-            },
-          ),
-        ],
+          ),        ],
       ),
     );
   }
 
-  void _printPdf() {
-    // Tenta imprimir (se tiver impressora disponível)
-    ref.read(printingProvider.notifier).printOrderReceipt(widget.receipt.order);
+  void _printInBrowser() {
+    // Chama o método de impressão no navegador
+    ref.read(printingProvider.notifier).printOrderReceiptInBrowser(widget.receipt.order);
     Navigator.of(context).pop();
   }
 }
