@@ -33,11 +33,10 @@ class CartItemCard extends ConsumerWidget {
     required this.currencyFormatter,
     required this.index,
   });
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSizes.paddingMedium),
+      margin: const EdgeInsets.only(bottom: AppSizes.paddingSmall), // Reduzido de paddingMedium
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -47,33 +46,37 @@ class CartItemCard extends ConsumerWidget {
             AppColors.surfaceContainer.withValues(alpha: 0.7),
           ],
         ),
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+        borderRadius: BorderRadius.circular(AppSizes.radiusSmall), // Reduzido de radiusMedium
         border: Border.all(color: AppColors.border.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadowLight,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            blurRadius: 4, // Reduzido de 8
+            offset: const Offset(0, 2), // Reduzido de (0, 4)
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+        borderRadius: BorderRadius.circular(AppSizes.radiusSmall), // Reduzido de radiusMedium
         child: IntrinsicHeight(
           child: Padding(
-            padding: const EdgeInsets.all(AppSizes.paddingMedium),
+            padding: const EdgeInsets.all(AppSizes.paddingSmall), // Reduzido de paddingMedium
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Imagem do produto - largura fixa - MIGRADO: CartItemEntity
-                ProductImage(item: item),
+                // Imagem do produto - versão compacta
+                ProductImage(
+                  item: item,
+                  width: 40, // Reduzido de 56
+                  height: 40, // Reduzido de 56
+                ),
 
-                const SizedBox(width: AppSizes.paddingMedium),
+                const SizedBox(width: AppSizes.paddingSmall), // Reduzido de paddingMedium
 
                 // Informações do produto - ocupa espaço restante
                 Expanded(child: _buildProductInfo()),
 
-                const SizedBox(width: AppSizes.paddingSmall),
+                const SizedBox(width: 4), // Reduzido de paddingSmall
 
                 // Controles de quantidade - largura fixa - MIGRADO: remover cartProvider
                 QuantityControls(item: item),
@@ -84,8 +87,7 @@ class CartItemCard extends ConsumerWidget {
       ),
     );
   }
-
-  /// Constrói a seção de informações do produto - MIGRADO: CartItemEntity
+  /// Constrói a seção de informações do produto - MIGRADO: CartItemEntity (versão compacta)
   Widget _buildProductInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,30 +98,30 @@ class CartItemCard extends ConsumerWidget {
           style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
-            fontSize: 14,
-            letterSpacing: 0.3,
+            fontSize: 13, // Reduzido de 14
+            letterSpacing: 0.2, // Reduzido de 0.3
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 2), // Reduzido de 6
         Text(
           currencyFormatter.format(
             item.productPrice,
           ), // MIGRADO: usar productPrice da CartItemEntity
           style: TextStyle(
             color: AppColors.textSecondary,
-            fontSize: 11,
+            fontSize: 10, // Reduzido de 11
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 1), // Reduzido de 2
         Text(
           'Total: ${currencyFormatter.format(item.subtotal)}', // MIGRADO: usar subtotal da CartItemEntity
           style: TextStyle(
             color: AppColors.priceColor,
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            fontSize: 11, // Reduzido de 12
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

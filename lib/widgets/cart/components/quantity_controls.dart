@@ -22,7 +22,6 @@ class QuantityControls extends ConsumerWidget {
   final CartItemEntity item;
 
   const QuantityControls({super.key, required this.item});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
@@ -65,15 +64,15 @@ class QuantityControls extends ConsumerWidget {
     );
   }
 
-  /// Constrói o botão de controle de quantidade
+  /// Constrói o botão de controle de quantidade (versão compacta)
   Widget _buildQuantityButton({
     required IconData icon,
     required VoidCallback onPressed,
     required Color color,
   }) {
     return SizedBox(
-      width: 32,
-      height: 32,
+      width: 28, // Reduzido de 32
+      height: 28, // Reduzido de 32
       child: Button(
         style: ButtonStyle(
           padding: WidgetStateProperty.all(EdgeInsets.zero),
@@ -93,23 +92,23 @@ class QuantityControls extends ConsumerWidget {
           ),
         ),
         onPressed: onPressed,
-        child: Icon(icon, size: 14, color: color),
+        child: Icon(icon, size: 12, color: color), // Reduzido de 14
       ),
     );
   }
 
-  /// Constrói o display da quantidade atual - MIGRADO: CartItemEntity
+  /// Constrói o display da quantidade atual - MIGRADO: CartItemEntity (versão compacta)
   Widget _buildQuantityDisplay() {
     return Container(
-      width: 32,
-      height: 32,
+      width: 24, // Reduzido de 32
+      height: 28, // Reduzido de 32
       alignment: Alignment.center,
       child: Text(
         '${item.quantity}', // MIGRADO: usar quantity da CartItemEntity
         style: TextStyle(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.bold,
-          fontSize: 13,
+          fontSize: 12, // Reduzido de 13
         ),
       ),
     );

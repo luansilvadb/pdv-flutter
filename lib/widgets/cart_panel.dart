@@ -165,11 +165,10 @@ class CartPanel extends ConsumerWidget {
       ],
     );
   }
-
-  /// Constrói a lista de itens do carrinho - MIGRADO: usar CartEntity
+  /// Constrói a lista de itens do carrinho - MIGRADO: usar CartEntity (versão compacta)
   Widget _buildCartItemsList(dynamic cart, NumberFormat currencyFormatter) {
     return ListView.builder(
-      padding: const EdgeInsets.all(AppSizes.paddingLarge),
+      padding: const EdgeInsets.all(AppSizes.paddingMedium), // Reduzido de paddingLarge
       itemCount: cart.items.length,
       itemBuilder: (context, index) {
         final item = cart.items[index];

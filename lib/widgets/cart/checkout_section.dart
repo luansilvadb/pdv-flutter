@@ -21,7 +21,7 @@ import '../../shared/presentation/widgets/custom_toast.dart';
 ///
 /// Exibe subtotal, taxa de serviço, total final e botão para
 /// finalizar pedido com diálogo de confirmação.
-class CheckoutSection extends ConsumerWidget {
+class CheckoutSection extends ConsumerStatefulWidget {
   /// Estado atual do carrinho
   final CartState cartState;
 
@@ -37,12 +37,20 @@ class CheckoutSection extends ConsumerWidget {
     required this.currentCart,
     required this.currencyFormatter,
   });
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CheckoutSection> createState() => _CheckoutSectionState();
+}
+
+class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = this.ref; // Acesso ao ref do ConsumerStatefulWidget
     // MIGRADO: Usar os totais já calculados da CartEntity
-    final subtotal = currentCart.rawSubtotal.value; // Subtotal sem impostos
-    final tax = currentCart.tax.value; // Taxa já calculada
-    final total = currentCart.total.value; // Total já calculado
+    final subtotal = widget.currentCart.rawSubtotal.value; // Subtotal sem impostos
+    final tax = widget.currentCart.tax.value; // Taxa já calculada
+    final total = widget.currentCart.total.value; // Total já calculado
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingLarge),
@@ -93,9 +101,8 @@ class CheckoutSection extends ConsumerWidget {
             fontSize: isTotal ? 17 : 15,
             letterSpacing: 0.3,
           ),
-        ),
-        Text(
-          currencyFormatter.format(amount),
+        ),        Text(
+          widget.currencyFormatter.format(amount),
           style: TextStyle(
             color: isTotal ? AppColors.priceColor : AppColors.textSecondary,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
@@ -158,47 +165,39 @@ class CheckoutSection extends ConsumerWidget {
             }
             return AppElevations.level2;
           }),
-        ),
-        onPressed: () => _showCheckoutDialog(context, ref, total),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.white.withValues(alpha: 0.1), Colors.transparent],
+        ),        onPressed: () => _showCheckoutDialog(context, ref, total),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              FluentIcons.print,
+              color: Colors.white,
+              size: AppSizes.iconMedium,
             ),
-            borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                FluentIcons.print,
+            const SizedBox(width: AppSizes.paddingMedium),
+            Text(
+              'Finalizar Pedido',
+              style: TextStyle(
                 color: Colors.white,
-                size: AppSizes.iconMedium,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                letterSpacing: 0.5,
               ),
-              const SizedBox(width: AppSizes.paddingMedium),
-              Text(
-                'Finalizar Pedido',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  /// Exibe diálogo de confirmação do pedido - MIGRADO: usar CartEntity
+  }  /// Exibe diálogo de confirmação do pedido - MIGRADO: usar CartEntity
   void _showCheckoutDialog(BuildContext context, WidgetRef ref, double total) {
+    String selectedPaymentMethod = 'Dinheiro'; // Estado local do dialog - movido para fora
+    
     showDialog(
       context: context,
-      builder: (context) => ContentDialog(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          
+          return ContentDialog(
         title: null, // Removendo o título padrão para usar um header customizado
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -310,24 +309,23 @@ class CheckoutSection extends ConsumerWidget {
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
-                  ),
-                  const SizedBox(height: AppSizes.paddingMedium),
+                  ),                  const SizedBox(height: AppSizes.paddingMedium),
                   
                   // Detalhes do pedido
                   _buildDetailRow(
                     FluentIcons.shopping_cart,
-                    '${currentCart.itemCount} ${currentCart.itemCount == 1 ? 'item' : 'itens'} no carrinho',
+                    '${widget.currentCart.itemCount} ${widget.currentCart.itemCount == 1 ? 'item' : 'itens'} no carrinho',
                     AppColors.textSecondary,
                   ),
                   const SizedBox(height: AppSizes.paddingSmall),
                   _buildDetailRow(
                     FluentIcons.money,
-                    'Subtotal: ${currencyFormatter.format(currentCart.subtotal.value)}',
+                    'Subtotal: ${widget.currencyFormatter.format(widget.currentCart.subtotal.value)}',
                     AppColors.textSecondary,
                   ),
                   const SizedBox(height: AppSizes.paddingSmall),                  _buildDetailRow(
                     FluentIcons.calculator_multiply,
-                    'Taxa (10%): ${currencyFormatter.format(currentCart.tax.value)}',
+                    'Taxa (10%): ${widget.currencyFormatter.format(widget.currentCart.tax.value)}',
                     AppColors.textSecondary,
                   ),
                   
@@ -364,8 +362,8 @@ class CheckoutSection extends ConsumerWidget {
                           ),
                           borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
                         ),
-                        child: Text(
-                          currencyFormatter.format(total),
+                        child:                        Text(
+                          widget.currencyFormatter.format(total),
                           style: TextStyle(
                             color: AppColors.primaryAccent,
                             fontWeight: FontWeight.bold,
@@ -379,9 +377,7 @@ class CheckoutSection extends ConsumerWidget {
               ),
             ),
             
-            const SizedBox(height: AppSizes.paddingLarge),
-            
-            // Métodos de pagamento (simulação para design)
+            const SizedBox(height: AppSizes.paddingLarge),            // Métodos de pagamento (simulação para design)
             Text(
               'Forma de Pagamento',
               style: TextStyle(
@@ -390,36 +386,47 @@ class CheckoutSection extends ConsumerWidget {
                 fontSize: 14,
               ),
             ),
+            const SizedBox(height: AppSizes.paddingSmall),            // Dinheiro
+            _buildDialogPaymentOption(
+              'Dinheiro',
+              FluentIcons.money,
+              AppColors.success,
+              selectedPaymentMethod == 'Dinheiro',
+              (value) {
+                setDialogState(() {
+                  selectedPaymentMethod = 'Dinheiro';
+                });
+              },
+            ),
+            
             const SizedBox(height: AppSizes.paddingSmall),
-            Container(
-              padding: const EdgeInsets.all(AppSizes.paddingSmall),
-              decoration: BoxDecoration(
-                color: AppColors.primaryAccent.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-                border: Border.all(
-                  color: AppColors.primaryAccent.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                children: [                  RadioButton(
-                    checked: true,
-                    onChanged: (_) {},
-                  ),
-                  Icon(
-                    FluentIcons.money,
-                    size: AppSizes.iconSmall,
-                    color: AppColors.success,
-                  ),
-                  const SizedBox(width: AppSizes.paddingSmall),
-                  Text(
-                    'Dinheiro',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),            ),
+            
+            // Cartão de Crédito
+            _buildDialogPaymentOption(
+              'Cartão de Crédito',
+              FluentIcons.payment_card,
+              AppColors.secondaryAccent,
+              selectedPaymentMethod == 'Cartão de Crédito',
+              (value) {
+                setDialogState(() {
+                  selectedPaymentMethod = 'Cartão de Crédito';
+                });
+              },
+            ),
+            
+            const SizedBox(height: AppSizes.paddingSmall),
+            
+            // PIX
+            _buildDialogPaymentOption(
+              'PIX',
+              FluentIcons.code,
+              AppColors.primaryAccent,
+              selectedPaymentMethod == 'PIX',
+              (value) {
+                setDialogState(() {
+                  selectedPaymentMethod = 'PIX';
+                });              },
+            ),
           ],
         ),
         actions: [
@@ -520,15 +527,16 @@ class CheckoutSection extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    onPressed: () => _confirmOrder(context, ref),
+                    onPressed: () => _confirmOrder(context, ref, selectedPaymentMethod),
                   ),
-                ),
-              ],
+                ),              ],
             ),
           ),
         ],
-      ),
-    );
+      );
+    },
+  ),
+);
   }
   
   // Método auxiliar para construir linhas de detalhes no modal
@@ -550,20 +558,32 @@ class CheckoutSection extends ConsumerWidget {
         ),
       ],
     );
-  }
-  /// Confirma o pedido e exibe notificação de sucesso - MIGRADO: usar Riverpod + Orders + Printing
-  void _confirmOrder(BuildContext context, WidgetRef ref) async {
-    try {      
+  }  /// Confirma o pedido e exibe notificação de sucesso - MIGRADO: usar Riverpod + Orders + Printing
+  void _confirmOrder(BuildContext context, WidgetRef ref, String selectedPaymentMethod) async {
+    try {        // Converter string para enum PaymentMethod
+      PaymentMethod paymentMethod;
+      switch (selectedPaymentMethod) {
+        case 'Cartão de Crédito':
+          paymentMethod = PaymentMethod.credit;
+          break;
+        case 'PIX':
+          paymentMethod = PaymentMethod.pix;
+          break;
+        case 'Dinheiro':
+        default:
+          paymentMethod = PaymentMethod.cash;
+          break;
+      }
+      
       // Criar o pedido a partir do carrinho
       final orderId = 'order_${DateTime.now().millisecondsSinceEpoch}';
-      
-      final order = OrderEntity.fromCart(
+        final order = OrderEntity.fromCart(
         id: orderId,
-        cartItems: currentCart.items,
-        subtotal: currentCart.subtotal,
-        tax: currentCart.tax,
-        total: currentCart.total,
-        paymentMethod: PaymentMethod.cash, // Padrão por enquanto
+        cartItems: widget.currentCart.items,
+        subtotal: widget.currentCart.subtotal,
+        tax: widget.currentCart.tax,
+        total: widget.currentCart.total,
+        paymentMethod: paymentMethod, // Usar o método selecionado
         customerName: 'Cliente', // Padrão por enquanto
       );
 
@@ -601,8 +621,7 @@ class CheckoutSection extends ConsumerWidget {
             color: AppColors.error,
             duration: const Duration(seconds: 4),
           );
-        }
-      }
+        }      }
     } catch (e) {      
       if (context.mounted) {
         Navigator.of(context).pop();
@@ -615,6 +634,62 @@ class CheckoutSection extends ConsumerWidget {
           duration: const Duration(seconds: 4),
         );
       }
-    }
+    }  }
+
+  /// Constrói uma opção de pagamento para o dialog (com callback)
+  Widget _buildDialogPaymentOption(
+    String label,
+    IconData icon,
+    Color iconColor,
+    bool isSelected,
+    ValueChanged<bool?> onChanged,
+  ) {
+    return GestureDetector(
+      onTap: () => onChanged(true),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.paddingMedium,
+          vertical: AppSizes.paddingSmall,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? AppColors.primaryAccent.withValues(alpha: 0.1)
+              : AppColors.surfaceVariant.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+          border: Border.all(
+            color: isSelected 
+                ? AppColors.primaryAccent.withValues(alpha: 0.3)
+                : AppColors.border.withValues(alpha: 0.2),
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            RadioButton(
+              checked: isSelected,
+              onChanged: onChanged,
+            ),
+            const SizedBox(width: AppSizes.paddingSmall),
+            Icon(
+              icon,
+              size: AppSizes.iconSmall,
+              color: iconColor,
+            ),
+            const SizedBox(width: AppSizes.paddingSmall),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
