@@ -371,57 +371,7 @@ class OrderCard extends ConsumerWidget {
                         ),
                       ),
                     ],
-                  ),
-                ),
-              ),
-            ),
-            
-            const SizedBox(width: AppSizes.paddingSmall),            // Botão para salvar PDF
-            Expanded(
-              child: FilledButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-                    if (states.contains(WidgetState.pressed)) {
-                      return AppColors.primaryAccent.withValues(alpha: 0.8);
-                    }
-                    if (states.contains(WidgetState.hovered)) {
-                      return AppColors.primaryAccent.withValues(alpha: 0.9);
-                    }
-                    return AppColors.primaryAccent;
-                  }),
-                  padding: WidgetStateProperty.all(
-                    const EdgeInsets.symmetric(vertical: AppSizes.paddingSmall),
-                  ),
-                ),
-                onPressed: () => _showSaveOptionsDialog(context, ref),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      FluentIcons.save,
-                      size: 16,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(width: AppSizes.paddingSmall),
-                    Flexible(
-                      child: Text(
-                        'Salvar PDF',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      FluentIcons.chevron_down,
-                      size: 10,
-                      color: Colors.white,
-                    ),
-                  ],
-                ),
+                  ),                ),
               ),
             ),
           ],
@@ -439,65 +389,9 @@ class OrderCard extends ConsumerWidget {
       case OrderStatus.cancelled:
         return AppColors.error;
     }
-  }
-  /// Exibe a prévia do cupom fiscal
+  }  /// Exibe a prévia do cupom fiscal
   void _showReceiptPreview(BuildContext context, WidgetRef ref) {
-    ref.read(printingProvider.notifier).showInternalPreview(context, order);
-  }  /// Exibe menu de opções para salvar PDF
-  void _showSaveOptionsDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => ContentDialog(
-        title: Row(
-          children: [
-            Icon(FluentIcons.save, color: AppColors.secondaryAccent),
-            const SizedBox(width: 8),
-            const Text('Salvar PDF'),
-          ],
-        ),
-        content: const Text('Escolha onde deseja salvar o PDF do cupom fiscal:'),
-        actions: [          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // Botão Cancelar
-              Expanded(
-                child: Button(
-                  child: const Text('Cancelar'),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ),
-              
-              const SizedBox(width: 12),
-              
-              // Botão Imprimir no Navegador
-              Expanded(
-                flex: 2,
-                child: FilledButton(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(FluentIcons.print, size: 16, color: Colors.white),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Imprimir no Navegador',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    ref.read(printingProvider.notifier).printOrderReceiptInBrowser(order);
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+    ref.read(printingProvider.notifier).printOrderReceiptInBrowser(order);
   }
 
   IconData _getPaymentIcon() {
