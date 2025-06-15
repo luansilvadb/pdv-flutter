@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/dependency_injection.dart';
 import 'screens/main_screen.dart';
+import 'widgets/printing_listener.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,9 +37,10 @@ class PDVRestaurantApp extends StatelessWidget {
         cardColor: AppColors.surface,
         menuColor: AppColors.surfaceElevated,
         visualDensity: VisualDensity.comfortable,
+      ),      debugShowCheckedModeBanner: false,
+      home: const PrintingListener(
+        child: MainScreen(),
       ),
-      debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
     );
   }
 }

@@ -1,10 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../providers/printing_providers.dart';
 import '../../domain/entities/order_entity.dart';
 
 /// Widget para exibir um card de pedido
-class OrderCard extends StatelessWidget {
+class OrderCard extends ConsumerWidget {
   final OrderEntity order;
 
   const OrderCard({
@@ -13,7 +15,7 @@ class OrderCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -55,10 +57,8 @@ class OrderCard extends StatelessWidget {
             // Itens do pedido (resumo)
             _buildItemsSummary(),
             
-            const SizedBox(height: AppSizes.paddingMedium),
-            
-            // Footer com total e data
-            _buildFooter(),
+            const SizedBox(height: AppSizes.paddingMedium),            // Footer com total e data
+            _buildFooter(context, ref),
           ],
         ),
       ),
@@ -270,67 +270,165 @@ class OrderCard extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context, WidgetRef ref) {
     final dateFormatter = DateFormat('dd/MM/yyyy HH:mm', 'pt_BR');
     
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        // Data do pedido
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(
-              FluentIcons.calendar,
-              color: AppColors.textTertiary,
-              size: 14,
+            // Data do pedido
+            Row(
+              children: [
+                Icon(
+                  FluentIcons.calendar,
+                  color: AppColors.textTertiary,
+                  size: 14,
+                ),
+                const SizedBox(width: AppSizes.paddingSmall),
+                Text(
+                  dateFormatter.format(order.createdAt),
+                  style: TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: AppSizes.paddingSmall),
-            Text(
-              dateFormatter.format(order.createdAt),
-              style: TextStyle(
-                color: AppColors.textTertiary,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+            
+            // Total do pedido
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.paddingMedium,
+                vertical: AppSizes.paddingSmall,
+              ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primaryAccent.withValues(alpha: 0.15),
+                    AppColors.primaryAccent.withValues(alpha: 0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+                border: Border.all(
+                  color: AppColors.primaryAccent.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(
+                'R\$ ${order.total.value.toStringAsFixed(2)}',
+                style: TextStyle(
+                  color: AppColors.primaryAccent,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
         ),
         
-        // Total do pedido
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.paddingMedium,
-            vertical: AppSizes.paddingSmall,
-          ),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primaryAccent.withValues(alpha: 0.15),
-                AppColors.primaryAccent.withValues(alpha: 0.05),
-              ],
+        const SizedBox(height: AppSizes.paddingMedium),
+        
+        // Botões de ação
+        Row(
+          children: [            // Botão para imprimir cupom fiscal
+            Expanded(
+              child: Builder(
+                builder: (buttonContext) => FilledButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                      if (states.contains(WidgetState.pressed)) {
+                        return AppColors.secondaryAccent.withValues(alpha: 0.8);
+                      }
+                      if (states.contains(WidgetState.hovered)) {
+                        return AppColors.secondaryAccent.withValues(alpha: 0.9);
+                      }
+                      return AppColors.secondaryAccent;
+                    }),
+                    padding: WidgetStateProperty.all(
+                      const EdgeInsets.symmetric(vertical: AppSizes.paddingSmall),
+                    ),
+                  ),
+                  onPressed: () => _showReceiptPreview(buttonContext, ref),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        FluentIcons.print,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: AppSizes.paddingSmall),
+                      Text(
+                        'Imprimir Cupom',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-            border: Border.all(
-              color: AppColors.primaryAccent.withValues(alpha: 0.3),
+            
+            const SizedBox(width: AppSizes.paddingSmall),            // Botão para salvar PDF
+            Expanded(
+              child: FilledButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.pressed)) {
+                      return AppColors.primaryAccent.withValues(alpha: 0.8);
+                    }
+                    if (states.contains(WidgetState.hovered)) {
+                      return AppColors.primaryAccent.withValues(alpha: 0.9);
+                    }
+                    return AppColors.primaryAccent;
+                  }),
+                  padding: WidgetStateProperty.all(
+                    const EdgeInsets.symmetric(vertical: AppSizes.paddingSmall),
+                  ),
+                ),
+                onPressed: () => _showSaveOptionsDialog(context, ref),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      FluentIcons.save,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: AppSizes.paddingSmall),
+                    Flexible(
+                      child: Text(
+                        'Salvar PDF',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      FluentIcons.chevron_down,
+                      size: 10,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          child: Text(
-            'R\$ ${order.total.value.toStringAsFixed(2)}',
-            style: TextStyle(
-              color: AppColors.primaryAccent,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          ],
         ),
       ],
     );
-  }
-
-  Color _getStatusColor() {
+  }  Color _getStatusColor() {
     switch (order.status) {
       case OrderStatus.pending:
         return AppColors.warning;
@@ -341,7 +439,99 @@ class OrderCard extends StatelessWidget {
       case OrderStatus.cancelled:
         return AppColors.error;
     }
-  }  IconData _getPaymentIcon() {
+  }
+  /// Exibe a prévia do cupom fiscal
+  void _showReceiptPreview(BuildContext context, WidgetRef ref) {
+    ref.read(printingProvider.notifier).showInternalPreview(context, order);
+  }  /// Exibe menu de opções para salvar PDF
+  void _showSaveOptionsDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => ContentDialog(
+        title: Row(
+          children: [
+            Icon(FluentIcons.save, color: AppColors.secondaryAccent),
+            const SizedBox(width: 8),
+            const Text('Salvar PDF'),
+          ],
+        ),
+        content: const Text('Escolha onde deseja salvar o PDF do cupom fiscal:'),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Botão Cancelar
+              Expanded(
+                child: Button(
+                  child: const Text('Cancelar'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+              
+              const SizedBox(width: 8),
+              
+              // Botão Pasta Padrão
+              Expanded(
+                child: Button(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(AppColors.surfaceVariant),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(FluentIcons.folder, size: 16, color: AppColors.textSecondary),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Pasta Padrão',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref.read(printingProvider.notifier).saveOrderReceiptPdf(order);
+                  },
+                ),
+              ),
+              
+              const SizedBox(width: 8),
+              
+              // Botão Escolher Pasta
+              Expanded(
+                child: FilledButton(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(FluentIcons.folder_open, size: 16, color: Colors.white),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Escolher Pasta',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref.read(printingProvider.notifier).saveOrderReceiptPdfWithPicker(order);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getPaymentIcon() {
     switch (order.paymentMethod) {
       case PaymentMethod.cash:
         return FluentIcons.money;

@@ -33,9 +33,16 @@ dependencies:
   
   # 🛠️ Utilities
   intl: ^0.20.2
-  
-  # 📊 Logging
+    # 📊 Logging
   logger: ^2.0.2+1
+  # 📄 PDF Generation
+  pdf: ^3.10.4
+  printing: ^5.11.0
+  path_provider: ^2.1.2
+  file_picker: ^8.1.6
+  
+  # 📄 PDF Viewer
+  pdfx: ^2.6.0
 
 dev_dependencies:
   # 🧪 Testing

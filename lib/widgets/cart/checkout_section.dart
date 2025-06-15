@@ -7,6 +7,7 @@ import '../../features/cart/presentation/providers/cart_state.dart';
 import '../../features/cart/domain/entities/cart_entity.dart';
 import '../../features/orders/domain/entities/order_entity.dart';
 import '../../features/orders/presentation/providers/orders_provider.dart';
+import '../../providers/printing_providers.dart';
 import '../../shared/presentation/widgets/custom_toast.dart';
 
 /// Seção de checkout com totais e botão de finalização - MIGRADO
@@ -550,10 +551,10 @@ class CheckoutSection extends ConsumerWidget {
       ],
     );
   }
-
-  /// Confirma o pedido e exibe notificação de sucesso - MIGRADO: usar Riverpod + Orders
+  /// Confirma o pedido e exibe notificação de sucesso - MIGRADO: usar Riverpod + Orders + Printing
   void _confirmOrder(BuildContext context, WidgetRef ref) async {
-    try {      // Criar o pedido a partir do carrinho
+    try {      
+      // Criar o pedido a partir do carrinho
       final orderId = 'order_${DateTime.now().millisecondsSinceEpoch}';
       
       final order = OrderEntity.fromCart(
@@ -571,20 +572,26 @@ class CheckoutSection extends ConsumerWidget {
       
       if (success) {
         // MIGRADO: Usar CartProvider Riverpod para limpar carrinho
-        ref.read(cartProvider.notifier).clearCart();        if (context.mounted) {
+        ref.read(cartProvider.notifier).clearCart();        // Gerar e exibir prévia interna do cupom fiscal automaticamente
+        if (context.mounted) {
+          ref.read(printingProvider.notifier).showInternalPreview(context, order);
+        }
+
+        if (context.mounted) {
           Navigator.of(context).pop();
           
           // Usar o toast personalizado pequeno e no topo centro
           showCustomToast(
             context,
             title: 'Pedido Finalizado',
-            message: 'Pedido #${orderId.substring(orderId.length - 8)} criado com sucesso!',
+            message: 'Pedido #${orderId.substring(orderId.length - 8)} criado e cupom fiscal gerado!',
             icon: FluentIcons.completed,
             color: AppColors.success,
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 5),
           );
         }
-      } else {        if (context.mounted) {
+      } else {        
+        if (context.mounted) {
           Navigator.of(context).pop();
           showCustomToast(
             context,
@@ -596,7 +603,8 @@ class CheckoutSection extends ConsumerWidget {
           );
         }
       }
-    } catch (e) {      if (context.mounted) {
+    } catch (e) {      
+      if (context.mounted) {
         Navigator.of(context).pop();
         showCustomToast(
           context,

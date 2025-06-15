@@ -34,6 +34,16 @@ import '../../features/orders/domain/usecases/create_order.dart';
 import '../../features/orders/domain/usecases/get_all_orders.dart';
 import '../../features/orders/domain/usecases/get_orders_by_date_range.dart';
 
+// Printing feature imports
+import '../../features/printing/data/datasources/pdf_generator.dart';
+import '../../features/printing/data/datasources/printing_service.dart';
+import '../../features/printing/data/repositories/printing_repository_impl.dart';
+import '../../features/printing/domain/repositories/printing_repository.dart';
+import '../../features/printing/domain/usecases/generate_receipt_pdf.dart';
+import '../../features/printing/domain/usecases/generate_pdf_bytes.dart';
+import '../../features/printing/domain/usecases/print_receipt.dart';
+import '../../features/printing/domain/usecases/save_receipt_pdf.dart';
+
 /// Service Locator global
 final sl = GetIt.instance;
 
@@ -91,6 +101,7 @@ Future<void> _initFeatures() async {
   await _initProductsFeature();
   await _initCartFeature();
   await _initOrdersFeature();
+  await _initPrintingFeature();
 }
 
 /// Inicializa dependências do módulo Products
@@ -157,8 +168,36 @@ Future<void> _initOrdersFeature() async {
   sl.registerLazySingleton<CreateOrder>(() => CreateOrder(sl()));
   
   sl.registerLazySingleton<GetAllOrders>(() => GetAllOrders(sl()));
+    sl.registerLazySingleton<GetOrdersByDateRange>(() => GetOrdersByDateRange(sl()));
+}
+
+/// Inicializa dependências do módulo Printing
+Future<void> _initPrintingFeature() async {
+  // Data sources
+  sl.registerLazySingleton<PdfGenerator>(
+    () => PdfGeneratorImpl(),
+  );
   
-  sl.registerLazySingleton<GetOrdersByDateRange>(() => GetOrdersByDateRange(sl()));
+  sl.registerLazySingleton<PrintingService>(
+    () => PrintingServiceImpl(pdfGenerator: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<PrintingRepository>(
+    () => PrintingRepositoryImpl(
+      pdfGenerator: sl(),
+      printingService: sl(),
+      logger: sl(),
+    ),
+  );
+  // Use cases
+  sl.registerLazySingleton<GenerateReceiptPdf>(() => GenerateReceiptPdf(sl()));
+  
+  sl.registerLazySingleton<GeneratePdfBytes>(() => GeneratePdfBytes(sl()));
+  
+  sl.registerLazySingleton<PrintReceipt>(() => PrintReceipt(sl()));
+  
+  sl.registerLazySingleton<SaveReceiptPdf>(() => SaveReceiptPdf(sl()));
 }
 
 /// Limpa todas as dependências (usado para testes)
