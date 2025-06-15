@@ -66,4 +66,6 @@ flutter:
   
   assets:
     - assets/images/
-    - assets/images/burgers/
+    - assets/images/Bebidas/
+    - assets/images/Hamburgueres/
+    - assets/images/Pizzas/
