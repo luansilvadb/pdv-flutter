@@ -44,18 +44,16 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   Widget build(BuildContext context) {
     final products = ref.watch(productsListProvider);
     final isLoading = ref.watch(isLoadingProductsProvider);
-    final error = ref.watch(productsErrorProvider);    // React to category selection changes - sem loading desnecessário
+    final error = ref.watch(productsErrorProvider);    // React to category selection changes - forçar reload para corrigir bug
     ref.listen<String?>(selectedCategoryIdProvider, (previous, next) {
-      if (previous != next) {
-        final currentState = ref.read(productsNotifierProvider);
-        // Evita recarregar se está voltando para a mesma categoria
-        if (next == null && currentState.selectedCategoryId != null) {
-          // Se nenhuma categoria selecionada, carrega todos os produtos
-          ref.read(productsNotifierProvider.notifier).loadAvailableProducts();
-        } else if (next != null && currentState.selectedCategoryId != next) {
-          // Se categoria selecionada diferente, filtra produtos por categoria
-          ref.read(productsNotifierProvider.notifier).loadProductsByCategory(next);
-        }
+      // Sempre executa o carregamento, independente se mudou ou não
+      // Isso corrige o bug de categoria não funcionar após voltar de "Todos"
+      if (next == null) {
+        // Se nenhuma categoria selecionada (botão "Todos"), carrega todos os produtos
+        ref.read(productsNotifierProvider.notifier).loadAvailableProducts();
+      } else {
+        // Se categoria selecionada, filtra produtos por categoria
+        ref.read(productsNotifierProvider.notifier).loadProductsByCategory(next);
       }
     });
 

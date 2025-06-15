@@ -65,13 +65,10 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
             error: null,
           ),
     );
-  }
-  /// Carrega produtos por categoria
+  }  /// Carrega produtos por categoria
   Future<void> loadProductsByCategory(String categoryId) async {
-    // Só mostra loading se não há produtos ou está mudando categoria
-    if (state.products.isEmpty || state.selectedCategoryId != categoryId) {
-      state = state.copyWith(isLoading: true, error: null);
-    }
+    // Força loading quando mudando categoria ou recarregando a mesma
+    state = state.copyWith(isLoading: true, error: null);
 
     final params = FilterProductsByCategoryParams(categoryId: categoryId);
     final result = await _filterProductsByCategory(params);

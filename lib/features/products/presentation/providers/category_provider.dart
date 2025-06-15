@@ -58,9 +58,9 @@ class CategoriesNotifier extends StateNotifier<CategoriesState> {
       );
     }
   }
-
   /// Define a categoria selecionada
   void setSelectedCategory(String? categoryId) {
+    // Sempre atualiza o estado para garantir que listeners sejam notificados
     state = state.copyWith(selectedCategoryId: categoryId);
   }
 
@@ -85,11 +85,35 @@ class CategoriesNotifier extends StateNotifier<CategoriesState> {
   /// Verifica se uma categoria está selecionada
   bool isCategorySelected(String categoryId) {
     return state.selectedCategoryId == categoryId;
-  }
-
-  /// Seleciona uma categoria - alias para compatibilidade
+  }  /// Seleciona uma categoria - alias para compatibilidade
   void selectCategory(String? categoryId) {
+    // Sempre atualiza o estado, mesmo se for a mesma categoria
+    // Isso força uma atualização nos listeners
     setSelectedCategory(categoryId);
+  }  /// Força atualização de categoria mesmo se for a mesma
+  void forceSelectCategory(String? categoryId) {
+    // Para "Todos" (null), sempre força uma mudança de estado
+    if (categoryId == null) {
+      // Se já está null, força mudança temporária e volta para null
+      if (state.selectedCategoryId == null) {
+        state = state.copyWith(selectedCategoryId: 'temp_clear');
+      }
+      state = state.copyWith(clearSelectedCategory: true);
+    } else {
+      // Para categorias específicas, limpa primeiro se for a mesma categoria
+      if (state.selectedCategoryId == categoryId) {
+        state = state.copyWith(clearSelectedCategory: true);
+      }
+      setSelectedCategory(categoryId);
+    }
+  }  /// Força seleção do "Todos" - método específico para corrigir bug
+  void forceShowAll() {
+    // Estratégia mais simples: sempre força uma mudança de estado
+    // Primeiro define uma categoria temporária diferente de null
+    state = state.copyWith(selectedCategoryId: 'force_update_${DateTime.now().millisecondsSinceEpoch}');
+    
+    // Depois define como null (Todos)
+    state = state.copyWith(clearSelectedCategory: true);
   }
 }
 

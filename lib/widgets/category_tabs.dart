@@ -238,7 +238,10 @@ class _CategoryTabsState extends ConsumerState<CategoryTabs>
           }),
         ),        onPressed: () {
           // MIGRADO: Usar CategoryProvider Riverpod para limpar seleção
-          ref.read(categoriesNotifierProvider.notifier).clearSelection();
+          // Força atualização para "Todos" mesmo se já está selecionado
+          ref
+              .read(categoriesNotifierProvider.notifier)
+              .forceShowAll();
         },
         child: Container(
           decoration:
@@ -396,9 +399,10 @@ class _CategoryTabsState extends ConsumerState<CategoryTabs>
           }),
         ),        onPressed: () {
           // MIGRADO: Usar CategoryProvider Riverpod para selecionar categoria
+          // Força atualização mesmo se for a mesma categoria
           ref
               .read(categoriesNotifierProvider.notifier)
-              .selectCategory(category.id);
+              .forceSelectCategory(category.id);
         },
         child: Container(
           decoration:
