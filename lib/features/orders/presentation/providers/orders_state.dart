@@ -6,15 +6,23 @@ class OrdersState extends Equatable {
   final List<OrderEntity> orders;
   final List<OrderEntity> allOrders;
   final bool isLoading;
+  final bool isLoadingMore;
   final String? error;
   final Map<String, dynamic>? statistics;
+  final int currentPage;
+  final int pageSize;
+  final bool hasMorePages;
 
   const OrdersState({
     this.orders = const [],
     this.allOrders = const [],
     this.isLoading = false,
+    this.isLoadingMore = false,
     this.error,
     this.statistics,
+    this.currentPage = 0,
+    this.pageSize = 20,
+    this.hasMorePages = true,
   });
 
   /// Cria uma cópia do estado com novos valores
@@ -22,15 +30,23 @@ class OrdersState extends Equatable {
     List<OrderEntity>? orders,
     List<OrderEntity>? allOrders,
     bool? isLoading,
+    bool? isLoadingMore,
     String? error,
     Map<String, dynamic>? statistics,
+    int? currentPage,
+    int? pageSize,
+    bool? hasMorePages,
   }) {
     return OrdersState(
       orders: orders ?? this.orders,
       allOrders: allOrders ?? this.allOrders,
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       error: error,
       statistics: statistics ?? this.statistics,
+      currentPage: currentPage ?? this.currentPage,
+      pageSize: pageSize ?? this.pageSize,
+      hasMorePages: hasMorePages ?? this.hasMorePages,
     );
   }
 
@@ -58,15 +74,27 @@ class OrdersState extends Equatable {
   /// Total de receita
   double get totalRevenue => 
       orders.fold(0.0, (sum, order) => sum + order.total.value);
-
   @override
-  List<Object?> get props => [orders, allOrders, isLoading, error, statistics];
+  List<Object?> get props => [
+    orders, 
+    allOrders, 
+    isLoading, 
+    isLoadingMore, 
+    error, 
+    statistics, 
+    currentPage, 
+    pageSize, 
+    hasMorePages
+  ];
 
   @override
   String toString() => 'OrdersState('
       'orders: ${orders.length}, '
       'allOrders: ${allOrders.length}, '
       'isLoading: $isLoading, '
+      'isLoadingMore: $isLoadingMore, '
+      'currentPage: $currentPage, '
+      'hasMorePages: $hasMorePages, '
       'error: $error'
       ')';
 }

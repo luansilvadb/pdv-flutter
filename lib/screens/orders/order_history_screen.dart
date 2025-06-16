@@ -25,32 +25,44 @@ class OrderHistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
-  bool _hasInitialized = false;
   // Controlador para manter o estado de scroll
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    // Carrega os pedidos apenas uma vez quando a tela é inicializada
+    // Carrega os pedidos paginados ao inicializar a tela
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_hasInitialized) {
-        ref.read(ordersNotifierProvider.notifier).loadAllOrders();
-        _hasInitialized = true;
-      }
+      ref.read(ordersNotifierProvider.notifier).loadOrdersPaginated();
     });
+    
+    // Adiciona listener para detectar scroll e carregar mais páginas
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
+  /// Detecta quando o usuário rola para o final da lista para carregar mais páginas
+  void _onScroll() {
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent - 200) {
+      // Carrega mais pedidos quando está próximo do final (200px antes)
+      final ordersState = ref.read(ordersNotifierProvider);
+      if (ordersState.hasMorePages && !ordersState.isLoadingMore) {
+        ref.read(ordersNotifierProvider.notifier).loadMoreOrders();
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final orders = ref.watch(ordersListProvider);
     final isLoading = ref.watch(isLoadingOrdersProvider);
+    final isLoadingMore = ref.watch(ordersNotifierProvider.select((state) => state.isLoadingMore));
     final error = ref.watch(ordersErrorProvider);
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -68,23 +80,22 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
       // Toda a tela agora é scrollável
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        controller: _scrollController,
-        child: ConstrainedBox(
+        controller: _scrollController,        child: ConstrainedBox(
           constraints: BoxConstraints(
             minHeight: screenHeight,
           ),
           child: screenHeight < 650 // Ajustado o threshold
-            ? _buildCompactLayout(context, orders, isLoading, error)
-            : _buildNormalLayout(context, orders, isLoading, error),
+            ? _buildCompactLayout(context, orders, isLoading, isLoadingMore, error)
+            : _buildNormalLayout(context, orders, isLoading, isLoadingMore, error),
         ),
       ),
     );
   }
-  
-  Widget _buildCompactLayout(
+    Widget _buildCompactLayout(
     BuildContext context,
     List<OrderEntity> orders,
     bool isLoading,
+    bool isLoadingMore,
     String? error,
   ) {
     return Column(
@@ -97,14 +108,15 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
         const OrderFilters(),
         
         // Orders Content - agora não usa Expanded
-        _buildContent(context, orders, isLoading, error),
+        _buildContent(context, orders, isLoading, isLoadingMore, error),
       ],
-    );  }
-  
-  Widget _buildNormalLayout(
+    );
+  }
+    Widget _buildNormalLayout(
     BuildContext context,
     List<OrderEntity> orders,
     bool isLoading,
+    bool isLoadingMore,
     String? error,
   ) {
     return Column(
@@ -121,8 +133,9 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
         const OrderFilters(),
 
         // Orders Content - agora não usa Expanded
-        _buildContent(context, orders, isLoading, error),
-      ],    );
+        _buildContent(context, orders, isLoading, isLoadingMore, error),
+      ],
+    );
   }
   Widget _buildEnhancedHeader(BuildContext context) {
     final now = DateTime.now();
@@ -284,63 +297,6 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
                 ),
               ),            ],
           ),
-
-          const SizedBox(height: AppSizes.paddingMedium), // Reduzido de paddingLarge
-
-          // Action buttons
-          Row(
-            children: [
-              FilledButton(
-                onPressed: () {
-                  ref.read(ordersNotifierProvider.notifier).loadAllOrders();
-                },
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(
-                    AppColors.secondaryAccent.withValues(alpha: 0.1),
-                  ),
-                  foregroundColor: WidgetStateProperty.all(
-                    AppColors.secondaryAccent,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(FluentIcons.refresh, size: AppSizes.iconSmall),
-                    const SizedBox(width: AppSizes.paddingSmall),
-                    const Text('Atualizar'),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSizes.paddingMedium),
-              Button(
-                onPressed: () {
-                  ref.read(ordersNotifierProvider.notifier).loadTodayOrders();
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(FluentIcons.calendar_day, size: AppSizes.iconSmall),
-                    const SizedBox(width: AppSizes.paddingSmall),
-                    const Text('Hoje'),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSizes.paddingSmall),
-              Button(
-                onPressed: () {
-                  ref.read(ordersNotifierProvider.notifier).loadThisWeekOrders();
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(FluentIcons.calendar_week, size: AppSizes.iconSmall),
-                    const SizedBox(width: AppSizes.paddingSmall),
-                    const Text('Esta Semana'),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -399,32 +355,17 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
                     color: AppColors.textSecondary,
                   ),
                 ),
-              ],
-            ),
-          ),
-          FilledButton(
-            onPressed: () {
-              ref.read(ordersNotifierProvider.notifier).loadAllOrders();
-            },
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
-                AppColors.secondaryAccent.withValues(alpha: 0.1),
-              ),
-              foregroundColor: WidgetStateProperty.all(
-                AppColors.secondaryAccent,
-              ),
-            ),
-            child: Icon(FluentIcons.refresh, size: AppSizes.iconSmall),
+              ],            ),
           ),
         ],
       ),
     );
   }
-
   Widget _buildContent(
     BuildContext context,
     List<OrderEntity> orders,
     bool isLoading,
+    bool isLoadingMore,
     String? error,
   ) {
     if (isLoading) {
@@ -439,8 +380,8 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
       return _buildEmptyState(context);
     }
 
-    return _buildOrdersList(context, orders);
-  }  Widget _buildErrorState(String error) {
+    return _buildOrdersList(context, orders, isLoadingMore);
+  }Widget _buildErrorState(String error) {
     return Container(
       constraints: BoxConstraints(
         minHeight: MediaQuery.of(context).size.height * 0.5,
@@ -468,10 +409,9 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSizes.paddingLarge),
-            FilledButton(
+            const SizedBox(height: AppSizes.paddingLarge),            FilledButton(
               onPressed: () {
-                ref.read(ordersNotifierProvider.notifier).loadAllOrders();
+                ref.read(ordersNotifierProvider.notifier).loadOrdersPaginated();
               },
               child: const Text('Tentar Novamente'),
             ),
@@ -541,7 +481,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
         ),
       ),
     );
-  }Widget _buildOrdersList(BuildContext context, List<OrderEntity> orders) {
+  }Widget _buildOrdersList(BuildContext context, List<OrderEntity> orders, bool isLoadingMore) {
     return Container(
       decoration: BoxDecoration(
         gradient: RadialGradient(
@@ -558,6 +498,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Lista de pedidos
             for (int index = 0; index < orders.length; index++)
               Padding(
                 padding: EdgeInsets.only(
@@ -565,7 +506,33 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> {
                       ? AppSizes.paddingSmall
                       : AppSizes.paddingMedium,
                 ),
-                child: OrderCard(order: orders[index]),              ),
+                child: OrderCard(order: orders[index]),
+              ),
+            
+            // Indicador de carregamento de mais páginas
+            if (isLoadingMore)
+              Container(
+                padding: const EdgeInsets.all(AppSizes.paddingLarge),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: ProgressRing(),
+                    ),
+                    const SizedBox(width: AppSizes.paddingMedium),
+                    Text(
+                      'Carregando mais pedidos...',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

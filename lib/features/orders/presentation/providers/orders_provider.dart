@@ -19,7 +19,6 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
     this._getAllOrders,
     this._getOrdersByDateRange,
   ) : super(OrdersState.empty);
-
   /// Carrega todos os pedidos
   Future<void> loadAllOrders() async {
     state = state.copyWith(isLoading: true, error: null);
@@ -44,7 +43,69 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
     );
   }
 
-  /// Cria um novo pedido
+  /// Carrega pedidos com paginação (primeira página)
+  Future<void> loadOrdersPaginated({int pageSize = 20}) async {
+    state = state.copyWith(
+      isLoading: true, 
+      error: null,
+      currentPage: 0,
+      pageSize: pageSize,
+    );
+
+    final result = await _getAllOrders(NoParams());
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(
+          isLoading: false, 
+          error: failure.message,
+        );
+      },
+      (allOrders) {
+        // Carrega apenas a primeira página
+        final firstPageOrders = allOrders.take(pageSize).toList();
+        final hasMore = allOrders.length > pageSize;
+        
+        state = state.copyWith(
+          isLoading: false,
+          orders: firstPageOrders,
+          allOrders: allOrders,
+          currentPage: 0,
+          hasMorePages: hasMore,
+          error: null,
+        );
+      },
+    );
+  }
+
+  /// Carrega mais pedidos (próxima página)
+  Future<void> loadMoreOrders() async {
+    if (state.isLoadingMore || !state.hasMorePages) return;
+
+    state = state.copyWith(isLoadingMore: true);
+
+    // Simula delay de rede para melhor UX
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final nextPage = state.currentPage + 1;
+    final startIndex = nextPage * state.pageSize;
+    final endIndex = startIndex + state.pageSize;
+    
+    final nextPageOrders = state.allOrders
+        .skip(startIndex)
+        .take(state.pageSize)
+        .toList();
+    
+    final updatedOrders = [...state.orders, ...nextPageOrders];
+    final hasMore = endIndex < state.allOrders.length;
+
+    state = state.copyWith(
+      isLoadingMore: false,
+      orders: updatedOrders,
+      currentPage: nextPage,
+      hasMorePages: hasMore,
+    );
+  }/// Cria um novo pedido
   Future<bool> createOrder(OrderEntity order) async {
     final result = await _createOrder(order);
 
@@ -54,17 +115,21 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
         return false;
       },
       (createdOrder) {
-        // Adiciona o novo pedido à lista existente
+        // Adiciona o novo pedido às listas existentes (tanto orders quanto allOrders)
         final updatedOrders = [createdOrder, ...state.orders];
+        final updatedAllOrders = [createdOrder, ...state.allOrders];
+        
+        // Força atualização imediata do estado para garantir reatividade
         state = state.copyWith(
           orders: updatedOrders,
+          allOrders: updatedAllOrders,
           error: null,
         );
+        
         return true;
       },
     );
   }
-
   /// Filtra pedidos por período
   Future<void> loadOrdersByDateRange(DateTime startDate, DateTime endDate) async {
     state = state.copyWith(isLoading: true, error: null);
@@ -84,6 +149,8 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
         );
       },
       (orders) {
+        // IMPORTANTE: Para os métodos de filtro por data, apenas atualiza orders,
+        // mas mantém allOrders intacto para não quebrar a reatividade dos filtros
         state = state.copyWith(
           isLoading: false,
           orders: orders,
@@ -201,24 +268,28 @@ final ordersStatisticsProvider = Provider<Map<String, dynamic>?>((ref) {
   return ref.watch(ordersNotifierProvider).statistics;
 });
 
-/// Provider para pedidos concluídos
+/// Provider para pedidos concluídos (baseado em filteredOrdersProvider para reatividade)
 final completedOrdersProvider = Provider<List<OrderEntity>>((ref) {
-  return ref.watch(ordersNotifierProvider).completedOrders;
+  final filteredOrders = ref.watch(filteredOrdersProvider);
+  return filteredOrders.where((order) => order.isCompleted).toList();
 });
 
-/// Provider para pedidos pendentes
+/// Provider para pedidos pendentes (baseado em filteredOrdersProvider para reatividade)
 final pendingOrdersProvider = Provider<List<OrderEntity>>((ref) {
-  return ref.watch(ordersNotifierProvider).pendingOrders;
+  final filteredOrders = ref.watch(filteredOrdersProvider);
+  return filteredOrders.where((order) => order.status == OrderStatus.pending).toList();
 });
 
-/// Provider para pedidos cancelados
+/// Provider para pedidos cancelados (baseado em filteredOrdersProvider para reatividade)
 final cancelledOrdersProvider = Provider<List<OrderEntity>>((ref) {
-  return ref.watch(ordersNotifierProvider).cancelledOrders;
+  final filteredOrders = ref.watch(filteredOrdersProvider);
+  return filteredOrders.where((order) => order.isCancelled).toList();
 });
 
-/// Provider para total de receita
+/// Provider para total de receita (baseado em filteredOrdersProvider para reatividade)
 final totalRevenueProvider = Provider<double>((ref) {
-  return ref.watch(ordersNotifierProvider).totalRevenue;
+  final filteredOrders = ref.watch(filteredOrdersProvider);
+  return filteredOrders.fold(0.0, (sum, order) => sum + order.total.value);
 });
 
 // ===== PROVIDERS PARA FILTROS =====
@@ -243,7 +314,10 @@ final selectedPeriodFilterProvider = StateProvider<PeriodFilter>((ref) {
 final filteredOrdersProvider = Provider<List<OrderEntity>>((ref) {
   final statusFilter = ref.watch(selectedStatusFilterProvider);
   final periodFilter = ref.watch(selectedPeriodFilterProvider);
-  final allOrders = ref.watch(ordersNotifierProvider).allOrders;
+  final ordersState = ref.watch(ordersNotifierProvider);
+  
+  // Garante reatividade observando mudanças no estado completo
+  final allOrders = ordersState.allOrders;
 
   // Aplica filtros combinados
   return _applyActiveFiltersSync(allOrders, statusFilter, periodFilter);

@@ -43,12 +43,11 @@ class CheckoutSection extends ConsumerStatefulWidget {
 }
 
 class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
-
   @override
   Widget build(BuildContext context) {
     final ref = this.ref; // Acesso ao ref do ConsumerStatefulWidget
     // MIGRADO: Usar os totais já calculados da CartEntity
-    final subtotal = widget.currentCart.rawSubtotal.value; // Subtotal sem impostos
+    final subtotal = widget.currentCart.subtotal.value; // Subtotal com descontos aplicados
     final tax = widget.currentCart.tax.value; // Taxa já calculada
     final total = widget.currentCart.total.value; // Total já calculado
 
