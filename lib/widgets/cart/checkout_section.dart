@@ -7,7 +7,7 @@ import '../../features/cart/presentation/providers/cart_state.dart';
 import '../../features/cart/domain/entities/cart_entity.dart';
 import '../../features/orders/domain/entities/order_entity.dart';
 import '../../features/orders/presentation/providers/orders_provider.dart';
-import '../../providers/printing_providers.dart';
+import '../../features/printing/presentation/providers/printing_queue_provider.dart';
 import '../../shared/presentation/widgets/custom_toast.dart';
 
 /// Seção de checkout com totais e botão de finalização - MIGRADO
@@ -45,7 +45,7 @@ class CheckoutSection extends ConsumerStatefulWidget {
 class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
   @override
   Widget build(BuildContext context) {
-    final ref = this.ref; // Acesso ao ref do ConsumerStatefulWidget
+    // final ref = this.ref; // Removido: não está mais em uso
     // MIGRADO: Usar os totais já calculados da CartEntity
     final subtotal = widget.currentCart.subtotal.value; // Subtotal com descontos aplicados
     final tax = widget.currentCart.tax.value; // Taxa já calculada
@@ -81,7 +81,7 @@ class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
           _buildDivider(),
           _buildTotalRow('Total', total, true),
           const SizedBox(height: AppSizes.paddingLarge),
-          _buildCheckoutButton(context, ref, total),
+          _buildCheckoutButton(context, total),
         ],
       ),
     );
@@ -133,9 +133,9 @@ class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
   /// Constrói o botão de finalizar pedido - MIGRADO: usar WidgetRef
   Widget _buildCheckoutButton(
     BuildContext context,
-    WidgetRef ref,
     double total,
   ) {
+    final ref = this.ref;
     return SizedBox(
       width: double.infinity,
       height: AppSizes.buttonHeight,
@@ -593,7 +593,7 @@ class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
         // MIGRADO: Usar CartProvider Riverpod para limpar carrinho
         ref.read(cartProvider.notifier).clearCart();        // Gerar e exibir prévia interna do cupom fiscal automaticamente
         if (context.mounted) {
-          ref.read(printingProvider.notifier).showInternalPreview(context, order);
+          ref.read(printingQueueProvider.notifier).addToQueue(context, order);
         }
 
         if (context.mounted) {
