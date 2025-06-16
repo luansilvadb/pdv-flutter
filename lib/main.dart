@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/services/dependency_injection.dart';
+import 'core/performance/performance_manager.dart';
+import 'core/optimization/preloading_system.dart';
+import 'core/debug/performance_dashboard.dart';
 import 'screens/main_screen.dart';
 import 'widgets/printing_listener.dart';
 
@@ -11,6 +14,15 @@ void main() async {
 
   // Inicializar dependências com nova arquitetura Clean
   await initializeDependencies();
+  
+  // Inicializar sistema de performance
+  PerformanceManager.instance;
+  
+  // Inicializar monitoramento interno de performance
+  PerformanceMonitor.instance.startMonitoring();
+  
+  // Inicializar sistema de preloading
+  await PreloadingSystem.instance.initialize();
 
   runApp(const ProviderScope(child: PDVRestaurantApp()));
 }

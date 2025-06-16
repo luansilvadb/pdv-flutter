@@ -27,9 +27,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final navigationState = ref.watch(navigationProvider);
-
-    return Container(
+    final navigationState = ref.watch(navigationProvider);    return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -42,12 +40,15 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           stops: const [0.0, 0.7, 1.0],
         ),
       ),
-      child: Row(        children: [
-          // Enhanced Sidebar
-          _buildModernSidebar(navigationState),
-
-          // Main content
-          Expanded(child: _buildMainContent(navigationState)),
+      child: Stack(
+        children: [
+          Row(
+            children: [
+              // Enhanced Sidebar
+              _buildModernSidebar(navigationState),              // Main content
+              Expanded(child: _buildMainContent(navigationState)),
+            ],
+          ),
         ],
       ),
     );

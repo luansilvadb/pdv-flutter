@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:provider/provider.dart'; // COMENTADO - Provider antigo
 import '../features/products/domain/entities/product_entity.dart';
 import '../core/constants/app_constants.dart';
+import '../core/performance/optimized_providers.dart';
 import '../features/cart/presentation/providers/cart_provider.dart';
 import 'package:intl/intl.dart';
 
@@ -83,7 +84,6 @@ class _ProductCardState extends ConsumerState<ProductCard>
     setState(() => _isHovered = false);
     _scaleController.reverse();
   }
-
   @override
   Widget build(BuildContext context) {
     final currencyFormatter = NumberFormat.currency(
@@ -92,50 +92,60 @@ class _ProductCardState extends ConsumerState<ProductCard>
       locale: 'pt_BR',
     );
 
-    return AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: MouseRegion(
-            onEnter: (_) => _handleHoverEnter(),
-            onExit: (_) => _handleHoverExit(),
-            child: GestureDetector(
-              onTap: widget.product.availableQuantity > 0 ? _handleTap : null,
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: _getCardGradient(),
-                  ),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
-                  border: Border.all(
-                    color: _getBorderColor(),
-                    width: _isHovered ? 2.0 : 1.0,
-                  ),
-                  boxShadow: _getBoxShadow(),
-                ),
-                child: Stack(
-                  children: [
-                    // Main content
-                    _buildCardContent(currencyFormatter),
+    // Otimização: Observa apenas se o produto está no carrinho
+    final isInCart = ref.watch(isProductInCartOptimizedProvider(widget.product.id));
 
-                    // Overlay when out of stock
-                    if (widget.product.availableQuantity == 0)
-                      _buildOutOfStockOverlay(),
-                  ],
+    return RepaintBoundary(
+      // RepaintBoundary isola repaints deste widget
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: MouseRegion(
+              onEnter: (_) => _handleHoverEnter(),
+              onExit: (_) => _handleHoverExit(),
+              child: GestureDetector(
+                onTap: widget.product.availableQuantity > 0 ? _handleTap : null,
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: _getCardGradient(),
+                    ),
+                    borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
+                    border: Border.all(
+                      color: _getBorderColor(),
+                      width: _isHovered ? 2.0 : 1.0,
+                    ),
+                    boxShadow: _getBoxShadow(),
+                  ),
+                  child: Stack(
+                    children: [
+                      // Main content
+                      _buildCardContent(currencyFormatter),
+
+                      // Overlay when out of stock
+                      if (widget.product.availableQuantity == 0)
+                        _buildOutOfStockOverlay(),
+                        
+                      // Indicador se está no carrinho
+                      if (isInCart)
+                        _buildInCartIndicator(),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
-
+  
   Widget _buildCardContent(NumberFormat currencyFormatter) {
     return Padding(
       padding: const EdgeInsets.all(AppSizes.paddingMedium),
@@ -484,6 +494,32 @@ class _ProductCardState extends ConsumerState<ProductCard>
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Constrói indicador visual de que o produto está no carrinho
+  Widget _buildInCartIndicator() {
+    return Positioned(
+      top: 8,
+      right: 8,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(          color: AppColors.primaryAccent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryAccent.withValues(alpha: 0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: const Icon(
+          FluentIcons.shopping_cart,
+          color: Colors.white,
+          size: 12,
         ),
       ),
     );
