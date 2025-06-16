@@ -43,6 +43,10 @@ class CheckoutSection extends ConsumerStatefulWidget {
 }
 
 class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
+  // Controle de concorrência e debounce
+  bool _isProcessing = false;
+  DateTime? _lastOrderTime;
+
   @override
   Widget build(BuildContext context) {
     // final ref = this.ref; // Removido: não está mais em uso
@@ -135,13 +139,14 @@ class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
     BuildContext context,
     double total,
   ) {
-    final ref = this.ref;
+    final isDisabled = _isProcessing || (_lastOrderTime != null && DateTime.now().difference(_lastOrderTime!) < const Duration(seconds: 2));
     return SizedBox(
       width: double.infinity,
       height: AppSizes.buttonHeight,
       child: FilledButton(
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (isDisabled) return AppColors.surfaceVariant.withValues(alpha: 0.3);
             if (states.contains(WidgetState.pressed)) {
               return AppColors.primaryAccentPressed;
             }
@@ -164,7 +169,8 @@ class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
             }
             return AppElevations.level2;
           }),
-        ),        onPressed: () => _showCheckoutDialog(context, ref, total),
+        ),
+        onPressed: isDisabled ? null : () => _showCheckoutDialog(context, ref, total),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -559,7 +565,11 @@ class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
     );
   }  /// Confirma o pedido e exibe notificação de sucesso - MIGRADO: usar Riverpod + Orders + Printing
   void _confirmOrder(BuildContext context, WidgetRef ref, String selectedPaymentMethod) async {
-    try {        // Converter string para enum PaymentMethod
+    if (_isProcessing) return;
+    _isProcessing = true;
+    setState(() {});
+    try {
+      // Converter string para enum PaymentMethod
       PaymentMethod paymentMethod;
       switch (selectedPaymentMethod) {
         case 'Cartão de Crédito':
@@ -588,7 +598,6 @@ class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
 
       // Salvar o pedido no histórico
       final success = await ref.read(ordersNotifierProvider.notifier).createOrder(order);
-      
       if (success) {
         // MIGRADO: Usar CartProvider Riverpod para limpar carrinho
         ref.read(cartProvider.notifier).clearCart();        // Gerar e exibir prévia interna do cupom fiscal automaticamente
@@ -633,7 +642,12 @@ class _CheckoutSectionState extends ConsumerState<CheckoutSection> {
           duration: const Duration(seconds: 4),
         );
       }
-    }  }
+    } finally {
+      _isProcessing = false;
+      _lastOrderTime = DateTime.now();
+      if (mounted) setState(() {});
+    }
+  }
 
   /// Constrói uma opção de pagamento para o dialog (com callback)
   Widget _buildDialogPaymentOption(

@@ -244,20 +244,8 @@ class _CategoryTabsState extends ConsumerState<CategoryTabs>
               .forceShowAll();
         },
         child: Container(
-          decoration:
-              isSelected
-                  ? BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.white.withValues(alpha: 0.1),
-                        Colors.transparent,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-                  )
-                  : null,
+          // Remover o gradiente do Container filho para evitar sobreposição de cor
+          decoration: null,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -405,20 +393,8 @@ class _CategoryTabsState extends ConsumerState<CategoryTabs>
               .forceSelectCategory(category.id);
         },
         child: Container(
-          decoration:
-              isSelected
-                  ? BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.white.withValues(alpha: 0.1),
-                        Colors.transparent,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-                  )
-                  : null,
+          // Remover o gradiente do Container filho para evitar sobreposição de cor
+          decoration: null,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
