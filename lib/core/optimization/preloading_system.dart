@@ -25,46 +25,52 @@ class PreloadingSystem {
     await _buildSearchIndex();
     _startBackgroundOptimizations();
   }
-  
-  /// Preload de assets críticos
+    /// Preload de assets críticos
   Future<void> _preloadCriticalAssets() async {
     // Lista de imagens críticas para preload
-    final criticalImages = [
-      'assets/images/logo.png',
-      'assets/images/placeholder.png',
-      // Adicione mais conforme necessário
+    final criticalImages = <String>[
+      // Adicione imagens críticas conforme necessário
+      // 'assets/images/logo.png',
+      // 'assets/images/placeholder.png',
     ];
-    
-    await Future.wait(
-      criticalImages.map((path) => preloadImage(path)),
-    );
+
+    if (criticalImages.isNotEmpty) {
+      await Future.wait(
+        criticalImages.map((path) => preloadImage(path)),
+      );
+    }
   }
-  
-  /// Preload de uma imagem específica
+    /// Preload de uma imagem específica
   Future<void> preloadImage(String imagePath) async {
     if (_preloadedImages.contains(imagePath) || 
         _preloadingImages.contains(imagePath)) {
       return _preloadCompleters[imagePath]?.future ?? Future.value();
     }
-    
+
     _preloadingImages.add(imagePath);
     final completer = Completer<void>();
     _preloadCompleters[imagePath] = completer;
-    
+
     try {
       if (imagePath.startsWith('assets/')) {
-        final data = await rootBundle.load(imagePath);
-        final bytes = data.buffer.asUint8List();
-        
-        // Salva no cache de imagens
-        ImageCache.putImageBytes(imagePath, bytes);
-        
-        debugPrint('✅ Preloaded asset: $imagePath (${bytes.length} bytes)');
+        // Verificar se o asset existe antes de tentar carregar
+        try {
+          final data = await rootBundle.load(imagePath);
+          final bytes = data.buffer.asUint8List();
+          
+          // Salva no cache de imagens
+          ImageCache.putImageBytes(imagePath, bytes);
+          
+          debugPrint('✅ Preloaded asset: $imagePath (${bytes.length} bytes)');
+        } catch (assetError) {
+          debugPrint('⚠️ Asset not found, skipping: $imagePath');
+          // Não tratamos como erro fatal se um asset não existe
+        }
       } else {
         // Para URLs externas (se necessário no futuro)
         debugPrint('⚠️ URL preloading not implemented: $imagePath');
       }
-      
+
       _preloadedImages.add(imagePath);
       completer.complete();
     } catch (e) {
