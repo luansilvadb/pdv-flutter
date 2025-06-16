@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/usecases/create_order.dart';
@@ -91,7 +92,6 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
       },
     );
   }
-
   /// Filtra pedidos por status
   void filterOrdersByStatus(OrderStatus? status) {
     if (status == null) {
@@ -102,6 +102,35 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
     final filteredOrders = state.allOrders
         .where((order) => order.status == status)
         .toList();
+    state = state.copyWith(orders: filteredOrders);
+  }
+
+  /// Aplica filtros combinados de status e período
+  void applyFilters({
+    OrderStatus? statusFilter,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) {
+    List<OrderEntity> filteredOrders = List.from(state.allOrders);
+
+    // Aplica filtro de status se especificado
+    if (statusFilter != null) {
+      filteredOrders = filteredOrders
+          .where((order) => order.status == statusFilter)
+          .toList();
+    }
+
+    // Aplica filtro de período se especificado
+    if (startDate != null && endDate != null) {
+      filteredOrders = filteredOrders
+          .where((order) {
+            final orderDate = order.createdAt;
+            return orderDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
+                   orderDate.isBefore(endDate.add(const Duration(days: 1)));
+          })
+          .toList();
+    }
+
     state = state.copyWith(orders: filteredOrders);
   }
 
@@ -152,9 +181,9 @@ final ordersNotifierProvider = StateNotifierProvider<OrdersNotifier, OrdersState
   );
 });
 
-/// Provider conveniente para acessar apenas a lista de pedidos
+/// Provider conveniente para acessar apenas a lista de pedidos (com filtros aplicados)
 final ordersListProvider = Provider<List<OrderEntity>>((ref) {
-  return ref.watch(ordersNotifierProvider).orders;
+  return ref.watch(filteredOrdersProvider);
 });
 
 /// Provider para verificar se está carregando
@@ -191,3 +220,105 @@ final cancelledOrdersProvider = Provider<List<OrderEntity>>((ref) {
 final totalRevenueProvider = Provider<double>((ref) {
   return ref.watch(ordersNotifierProvider).totalRevenue;
 });
+
+// ===== PROVIDERS PARA FILTROS =====
+
+/// Enum para tipos de filtro de status
+enum StatusFilter { all, pending, processing, completed, cancelled }
+
+/// Enum para tipos de filtro de período
+enum PeriodFilter { all, today, week, month }
+
+/// Provider para filtro de status selecionado
+final selectedStatusFilterProvider = StateProvider<StatusFilter>((ref) {
+  return StatusFilter.all;
+});
+
+/// Provider para filtro de período selecionado
+final selectedPeriodFilterProvider = StateProvider<PeriodFilter>((ref) {
+  return PeriodFilter.all;
+});
+
+/// Provider combinado que aplica filtros automaticamente
+final filteredOrdersProvider = Provider<List<OrderEntity>>((ref) {
+  final statusFilter = ref.watch(selectedStatusFilterProvider);
+  final periodFilter = ref.watch(selectedPeriodFilterProvider);
+  final allOrders = ref.watch(ordersNotifierProvider).allOrders;
+
+  // Aplica filtros combinados
+  return _applyActiveFiltersSync(allOrders, statusFilter, periodFilter);
+});
+
+/// Função auxiliar para aplicar filtros sincronamente
+List<OrderEntity> _applyActiveFiltersSync(
+  List<OrderEntity> allOrders,
+  StatusFilter statusFilter,
+  PeriodFilter periodFilter,
+) {
+  List<OrderEntity> filteredOrders = List.from(allOrders);
+
+  // Aplica filtro de status
+  if (statusFilter != StatusFilter.all) {
+    OrderStatus orderStatus;
+    switch (statusFilter) {
+      case StatusFilter.pending:
+        orderStatus = OrderStatus.pending;
+        break;
+      case StatusFilter.processing:
+        orderStatus = OrderStatus.processing;
+        break;
+      case StatusFilter.completed:
+        orderStatus = OrderStatus.completed;
+        break;
+      case StatusFilter.cancelled:
+        orderStatus = OrderStatus.cancelled;
+        break;
+      case StatusFilter.all:
+        // Não deveria chegar aqui
+        orderStatus = OrderStatus.pending;
+        break;
+    }
+    
+    filteredOrders = filteredOrders
+        .where((order) => order.status == orderStatus)
+        .toList();
+  }
+
+  // Aplica filtro de período
+  if (periodFilter != PeriodFilter.all) {
+    final now = DateTime.now();
+    DateTime startDate;
+    DateTime endDate;
+    
+    switch (periodFilter) {
+      case PeriodFilter.today:
+        startDate = DateTime(now.year, now.month, now.day);
+        endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+        break;
+      case PeriodFilter.week:
+        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        startDate = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+        endDate = startDate.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+        break;
+      case PeriodFilter.month:
+        startDate = DateTime(now.year, now.month, 1);
+        endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+        break;
+      case PeriodFilter.all:
+        // Não deveria chegar aqui
+        startDate = DateTime.now();
+        endDate = DateTime.now();
+        break;
+    }
+    
+    filteredOrders = filteredOrders
+        .where((order) {
+          final orderDate = order.createdAt;
+          return orderDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
+                 orderDate.isBefore(endDate.add(const Duration(days: 1)));
+        })
+        .toList();
+  }
+
+  return filteredOrders;
+}
