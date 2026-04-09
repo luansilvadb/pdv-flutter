@@ -43,13 +43,28 @@ class NavigationNotifier extends StateNotifier<NavigationState> {
     setSelectedIndex(2);
   }
 
+  /// Navega para o dashboard
+  void navigateToDashboard() {
+    setSelectedIndex(3);
+  }
+
+  /// Navega para o inventário
+  void navigateToInventory() {
+    setSelectedIndex(4);
+  }
+
   /// Navega para promoções
   void navigateToPromotions() {
-    setSelectedIndex(3);
+    setSelectedIndex(5);
+  }
+
+  /// Navega para relatórios
+  void navigateToReports() {
+    setSelectedIndex(6);
   }
 
   /// Navega para configurações
   void navigateToSettings() {
-    setSelectedIndex(4);
+    setSelectedIndex(7);
   }
 }

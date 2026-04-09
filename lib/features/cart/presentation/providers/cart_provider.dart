@@ -10,6 +10,8 @@ import '../../domain/usecases/remove_from_cart.dart';
 import '../../domain/usecases/update_cart_item_quantity.dart';
 import '../../domain/usecases/get_cart.dart';
 import '../../domain/usecases/clear_cart.dart';
+import '../../../promotions/presentation/providers/promotions_provider.dart';
+import '../../../promotions/domain/entities/promotion.dart';
 import 'cart_state.dart';
 
 /// Provider StateNotifier para gerenciar o estado do carrinho
@@ -20,6 +22,7 @@ class CartNotifier extends StateNotifier<CartState> {
   final GetCart _getCart;
   final ClearCart _clearCart;
   final Logger _logger;
+  final Ref _ref;
 
   CartNotifier({
     required AddToCart addToCart,
@@ -28,12 +31,14 @@ class CartNotifier extends StateNotifier<CartState> {
     required GetCart getCart,
     required ClearCart clearCart,
     required Logger logger,
+    required Ref ref,
   }) : _addToCart = addToCart,
        _removeFromCart = removeFromCart,
        _updateCartItemQuantity = updateCartItemQuantity,
        _getCart = getCart,
        _clearCart = clearCart,
        _logger = logger,
+       _ref = ref,
        super(const CartInitial());
 
   /// Carrinho atual (apenas quando carregado)
@@ -73,7 +78,8 @@ class CartNotifier extends StateNotifier<CartState> {
       },
       (cart) {
         _logger.d('Carrinho carregado com ${cart.items.length} itens');
-        state = CartLoaded(cart);
+        final cartWithPromos = _applyPromotions(cart);
+        state = CartLoaded(cartWithPromos);
       },
     );
   }  /// Adiciona produto ao carrinho
@@ -108,7 +114,8 @@ class CartNotifier extends StateNotifier<CartState> {
       },
       (cart) {
         _logger.d('Produto adicionado com sucesso');
-        state = CartLoaded(cart);
+        final cartWithPromos = _applyPromotions(cart);
+        state = CartLoaded(cartWithPromos);
       },
     );
   }
@@ -128,7 +135,8 @@ class CartNotifier extends StateNotifier<CartState> {
       },
       (cart) {
         _logger.d('Produto removido com sucesso');
-        state = CartLoaded(cart);
+        final cartWithPromos = _applyPromotions(cart);
+        state = CartLoaded(cartWithPromos);
       },
     );
   }  /// Atualiza quantidade de um produto
@@ -150,7 +158,8 @@ class CartNotifier extends StateNotifier<CartState> {
       },
       (cart) {
         _logger.d('Quantidade atualizada com sucesso');
-        state = CartLoaded(cart);
+        final cartWithPromos = _applyPromotions(cart);
+        state = CartLoaded(cartWithPromos);
       },
     );
   }
@@ -211,6 +220,61 @@ class CartNotifier extends StateNotifier<CartState> {
     await initialize();
   }
 
+  /// Aplica promoções ativas ao carrinho
+  CartEntity _applyPromotions(CartEntity cart) {
+    final activePromos = _ref.read(promotionsProvider);
+    if (activePromos.isEmpty) return cart;
+
+    double totalDiscount = 0.0;
+    for (final promo in activePromos) {
+      if (!promo.isActive()) continue;
+
+      if (cart.subtotal.value >= promo.minSubtotal) {
+        if (promo.type == PromotionType.PERCENTAGE) {
+          totalDiscount += cart.subtotal.value * promo.value;
+        } else if (promo.type == PromotionType.FIXED) {
+          totalDiscount += promo.value;
+        } else if (promo.type == PromotionType.BOGO) {
+          // Lógica Leve Pague (BOGO)
+          for (final item in cart.items) {
+            if (promo.applicableProductIds.contains(item.productId) || promo.applicableProductIds.isEmpty) {
+              final buyQ = promo.buyQuantity ?? 1;
+              final getQ = promo.getQuantity ?? 1;
+              final freeSets = item.quantity.value ~/ (buyQ + getQ);
+              totalDiscount += freeSets * getQ * (item.price.value / item.quantity.value);
+            }
+          }
+        } else if (promo.type == PromotionType.COMBO) {
+          // Lógica de Combo
+          if (promo.comboItems != null) {
+            int maxCombos = 999;
+            bool hasAll = true;
+            for (final entry in promo.comboItems!.entries) {
+              final itemInCart = cart.findItemByProductId(entry.key);
+              if (itemInCart == null || itemInCart.quantity.value < entry.value) {
+                hasAll = false;
+                break;
+              }
+              final possible = itemInCart.quantity.value ~/ entry.value;
+              if (possible < maxCombos) maxCombos = possible;
+            }
+            if (hasAll && maxCombos > 0) {
+              totalDiscount += maxCombos * promo.value;
+            }
+          }
+        }
+      }
+    }
+
+    if (totalDiscount > 0) {
+      return cart.copyWith(
+        discount: Money(totalDiscount),
+        total: Money((cart.subtotal.value + cart.tax.value - totalDiscount).clamp(0, double.infinity)),
+      );
+    }
+    return cart;
+  }
+
   /// Método privado para mostrar erro temporário
   void _showError(String message) {
     // Em uma implementação real, você poderia usar um sistema de notificações
@@ -228,6 +292,7 @@ final cartProvider = StateNotifierProvider<CartNotifier, CartState>((ref) {
     getCart: sl<GetCart>(),
     clearCart: sl<ClearCart>(),
     logger: sl<Logger>(),
+    ref: ref,
   );
 });
 

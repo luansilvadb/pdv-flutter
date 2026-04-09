@@ -6,6 +6,10 @@ import '../features/navigation/presentation/providers/navigation_state.dart';
 import '../features/cart/presentation/providers/cart_provider.dart';
 import '../screens/menu_screen.dart';
 import '../screens/orders/order_history_screen.dart';
+import '../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../features/inventory/presentation/screens/inventory_screen.dart';
+import '../features/promotions/presentation/screens/promotions_screen.dart';
+import '../features/reports/presentation/screens/reports_screen.dart';
 import '../widgets/cart_panel.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -342,7 +346,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         _buildHomeScreen(),
         _buildMenuWithCart(),
         _buildHistoryScreen(),
-        _buildPromosScreen(),
+        const DashboardScreen(),
+        const InventoryScreen(),
+        const PromotionsScreen(),
+        const ReportsScreen(),
         _buildSettingsScreen(),
       ],
     );
@@ -369,8 +376,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       case 2:
         return FluentIcons.history;
       case 3:
-        return FluentIcons.emoji;
+        return FluentIcons.view_dashboard;
       case 4:
+        return FluentIcons.stock_up;
+      case 5:
+        return FluentIcons.tag;
+      case 6:
+        return FluentIcons.report_document;
+      case 7:
         return FluentIcons.settings;
       default:
         return FluentIcons.more;

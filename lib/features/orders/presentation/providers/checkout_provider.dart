@@ -4,6 +4,7 @@ import '../../domain/entities/order_entity.dart';
 import '../../domain/usecases/create_order.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../cart/domain/entities/cart_entity.dart';
+import '../../../inventory/presentation/providers/inventory_provider.dart';
 import 'checkout_state.dart';
 import 'orders_provider.dart';
 
@@ -51,6 +52,14 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     final success = await _ref.read(ordersNotifierProvider.notifier).createOrder(order);
 
     if (success) {
+      // Atualiza o estoque para cada item do carrinho
+      for (final item in cart.items) {
+        await _ref.read(inventoryProvider.notifier).updateStock(
+          item.productId,
+          _calculateNewStock(item.productId, item.quantity.value),
+        );
+      }
+
       state = state.copyWith(
         isLoading: false,
         completedOrder: order,
@@ -70,6 +79,18 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
   /// Reinicia o estado do checkout
   void reset() {
     state = const CheckoutState();
+  }
+
+  /// Calcula o novo estoque após a venda
+  double _calculateNewStock(String productId, int soldQuantity) {
+    final inventoryItems = _ref.read(inventoryProvider).items;
+    final itemIndex = inventoryItems.indexWhere((i) => i.productId == productId);
+
+    if (itemIndex == -1) {
+      return 0.0; // Graceful handling if item not in inventory
+    }
+
+    return inventoryItems[itemIndex].currentQuantity - soldQuantity;
   }
 }
 

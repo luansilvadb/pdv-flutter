@@ -16,7 +16,10 @@ class AppConstants {
     'Home',
     'Menu',
     'History',
+    'Dashboard',
+    'Inventory',
     'Promos',
+    'Reports',
     'Settings',
   ];
 
