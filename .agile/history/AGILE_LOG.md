@@ -7,3 +7,11 @@
 - [BUMP SemVer] v2.0.0 -> v2.1.0.
 - [ARQUIVAMENTO] Sprint v2.1.0 e especificações movidas para o histórico.
 - [PLANEJAMENTO] Iniciando v2.2.0 - Gestão Avançada.
+
+## [2.2.0] - 2026-04-09
+### Concluído
+- Implementação do Sistema de Estoque com baixa automática.
+- Motor de Promoções integrado ao Carrinho.
+- Dashboard Gerencial com KPIs em tempo real.
+- Relatórios de vendas com agregação por período.
+- Atualização da navegação e interface Fluent UI.
