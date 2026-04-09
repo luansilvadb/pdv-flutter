@@ -7,10 +7,10 @@
 - [x] Histórico de vendas
 
 ## v2.2.0 - Gestão Avançada
-- [ ] Relatórios detalhados
-- [ ] Gestão de estoque
-- [ ] Sistema de promoções
-- [ ] Dashboard gerencial
+- [x] Relatórios detalhados
+- [x] Gestão de estoque
+- [x] Sistema de promoções
+- [x] Dashboard gerencial
 
 ## v2.3.0 - Integração
 - [ ] API backend

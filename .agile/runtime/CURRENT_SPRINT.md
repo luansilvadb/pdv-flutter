@@ -1,6 +1,6 @@
-# Sprint v2.2.0 - Gestão Avançada
+# Sprint v2.3.0 - Integração
 
-- [ ] Relatórios detalhados
-- [ ] Gestão de estoque
-- [ ] Sistema de promoções
-- [ ] Dashboard gerencial
+- [ ] API backend
+- [ ] Sincronização multi-device
+- [ ] Integração com delivery
+- [ ] Sistema de usuários

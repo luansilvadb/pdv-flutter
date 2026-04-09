@@ -26,6 +26,19 @@ import '../../features/cart/domain/usecases/update_cart_item_quantity.dart';
 import '../../features/cart/domain/usecases/get_cart.dart';
 import '../../features/cart/domain/usecases/clear_cart.dart';
 
+// Inventory feature imports
+import '../../features/inventory/data/datasources/inventory_local_datasource.dart';
+import '../../features/inventory/data/repositories/inventory_repository_impl.dart';
+import '../../features/inventory/domain/repositories/inventory_repository.dart';
+import '../../features/inventory/domain/use_cases/get_inventory_items.dart';
+import '../../features/inventory/domain/use_cases/update_inventory_stock.dart';
+
+// Promotions feature imports
+import '../../features/promotions/data/datasources/promotions_local_datasource.dart';
+import '../../features/promotions/data/repositories/promotions_repository_impl.dart';
+import '../../features/promotions/domain/repositories/promotions_repository.dart';
+import '../../features/promotions/domain/use_cases/get_active_promotions.dart';
+
 // Orders feature imports
 import '../../features/orders/data/datasources/order_local_data_source.dart';
 import '../../features/orders/data/repositories/order_repository_impl.dart';
@@ -100,8 +113,49 @@ Future<void> _initExternal() async {
 Future<void> _initFeatures() async {
   await _initProductsFeature();
   await _initCartFeature();
+  await _initInventoryFeature();
+  await _initPromotionsFeature();
   await _initOrdersFeature();
   await _initPrintingFeature();
+}
+
+/// Inicializa dependências do módulo Inventory
+Future<void> _initInventoryFeature() async {
+  // Data sources
+  sl.registerLazySingleton<InventoryLocalDataSource>(
+    () => InventoryLocalDataSourceImpl(localStorage: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<InventoryRepository>(
+    () => InventoryRepositoryImpl(localDataSource: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton<GetInventoryItems>(
+    () => GetInventoryItems(sl()),
+  );
+  sl.registerLazySingleton<UpdateInventoryStock>(
+    () => UpdateInventoryStock(sl()),
+  );
+}
+
+/// Inicializa dependências do módulo Promotions
+Future<void> _initPromotionsFeature() async {
+  // Data sources
+  sl.registerLazySingleton<PromotionsLocalDataSource>(
+    () => PromotionsLocalDataSourceImpl(localStorage: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<PromotionsRepository>(
+    () => PromotionsRepositoryImpl(localDataSource: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton<GetActivePromotions>(
+    () => GetActivePromotions(sl()),
+  );
 }
 
 /// Inicializa dependências do módulo Products
