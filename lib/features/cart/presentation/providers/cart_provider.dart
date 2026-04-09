@@ -10,6 +10,8 @@ import '../../domain/usecases/remove_from_cart.dart';
 import '../../domain/usecases/update_cart_item_quantity.dart';
 import '../../domain/usecases/get_cart.dart';
 import '../../domain/usecases/clear_cart.dart';
+import '../../../promotions/presentation/providers/promotions_provider.dart';
+import '../../../promotions/domain/entities/promotion.dart';
 import 'cart_state.dart';
 
 /// Provider StateNotifier para gerenciar o estado do carrinho
@@ -20,6 +22,7 @@ class CartNotifier extends StateNotifier<CartState> {
   final GetCart _getCart;
   final ClearCart _clearCart;
   final Logger _logger;
+  final Ref _ref;
 
   CartNotifier({
     required AddToCart addToCart,
@@ -28,13 +31,15 @@ class CartNotifier extends StateNotifier<CartState> {
     required GetCart getCart,
     required ClearCart clearCart,
     required Logger logger,
-  }) : _addToCart = addToCart,
-       _removeFromCart = removeFromCart,
-       _updateCartItemQuantity = updateCartItemQuantity,
-       _getCart = getCart,
-       _clearCart = clearCart,
-       _logger = logger,
-       super(const CartInitial());
+    required Ref ref,
+  })  : _addToCart = addToCart,
+        _removeFromCart = removeFromCart,
+        _updateCartItemQuantity = updateCartItemQuantity,
+        _getCart = getCart,
+        _clearCart = clearCart,
+        _logger = logger,
+        _ref = ref,
+        super(const CartInitial());
 
   /// Carrinho atual (apenas quando carregado)
   CartEntity? get currentCart {
@@ -73,7 +78,7 @@ class CartNotifier extends StateNotifier<CartState> {
       },
       (cart) {
         _logger.d('Carrinho carregado com ${cart.items.length} itens');
-        state = CartLoaded(cart);
+        _applyPromotions(cart);
       },
     );
   }  /// Adiciona produto ao carrinho
@@ -108,7 +113,7 @@ class CartNotifier extends StateNotifier<CartState> {
       },
       (cart) {
         _logger.d('Produto adicionado com sucesso');
-        state = CartLoaded(cart);
+        _applyPromotions(cart);
       },
     );
   }
@@ -128,7 +133,7 @@ class CartNotifier extends StateNotifier<CartState> {
       },
       (cart) {
         _logger.d('Produto removido com sucesso');
-        state = CartLoaded(cart);
+        _applyPromotions(cart);
       },
     );
   }  /// Atualiza quantidade de um produto
@@ -150,7 +155,7 @@ class CartNotifier extends StateNotifier<CartState> {
       },
       (cart) {
         _logger.d('Quantidade atualizada com sucesso');
-        state = CartLoaded(cart);
+        _applyPromotions(cart);
       },
     );
   }
@@ -206,6 +211,44 @@ class CartNotifier extends StateNotifier<CartState> {
     return currentCart?.findItemByProductId(productId)?.quantity.value ?? 0;
   }
 
+  /// Aplica promoções ativas ao carrinho
+  void _applyPromotions(CartEntity cart) {
+    final promotionsAsync = _ref.read(promotionsProvider);
+
+    promotionsAsync.whenData((promotions) {
+      double totalDiscount = 0.0;
+
+      for (var promo in promotions) {
+        if (promo.type == PromotionType.percentage) {
+          final minSubtotal = promo.conditions['min_subtotal'] ?? 0.0;
+          if (cart.subtotal.value >= minSubtotal) {
+            totalDiscount += cart.subtotal.value * promo.value;
+          }
+        } else if (promo.type == PromotionType.fixed) {
+           final minSubtotal = promo.conditions['min_subtotal'] ?? 0.0;
+           if (cart.subtotal.value >= minSubtotal) {
+             totalDiscount += promo.value;
+           }
+        }
+        // Outros tipos podem ser adicionados aqui
+      }
+
+      if (totalDiscount > 0) {
+        final updatedCart = cart.copyWith(
+          discount: Money(totalDiscount),
+          total: Money(cart.subtotal.value + cart.tax.value - totalDiscount),
+        );
+        state = CartLoaded(updatedCart);
+      } else {
+        state = CartLoaded(cart);
+      }
+    });
+
+    if (promotionsAsync is AsyncLoading || promotionsAsync is AsyncError) {
+       state = CartLoaded(cart);
+    }
+  }
+
   /// Recarrega o carrinho
   Future<void> refresh() async {
     await initialize();
@@ -228,6 +271,7 @@ final cartProvider = StateNotifierProvider<CartNotifier, CartState>((ref) {
     getCart: sl<GetCart>(),
     clearCart: sl<ClearCart>(),
     logger: sl<Logger>(),
+    ref: ref,
   );
 });
 

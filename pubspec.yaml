@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   fluent_ui: ^4.8.6
   fluentui_icons: ^1.0.0
+  fl_chart: ^0.70.2
   
   # 🔄 State Management
   riverpod: ^2.4.9

@@ -34,6 +34,20 @@ import '../../features/orders/domain/usecases/create_order.dart';
 import '../../features/orders/domain/usecases/get_all_orders.dart';
 import '../../features/orders/domain/usecases/get_orders_by_date_range.dart';
 
+// Inventory feature imports
+import '../../features/inventory/data/datasources/inventory_local_datasource.dart';
+import '../../features/inventory/data/repositories/inventory_repository_impl.dart';
+import '../../features/inventory/domain/repositories/inventory_repository.dart';
+
+// Promotions feature imports
+import '../../features/promotions/data/datasources/promotion_local_datasource.dart';
+import '../../features/promotions/data/repositories/promotion_repository_impl.dart';
+import '../../features/promotions/domain/repositories/promotion_repository.dart';
+
+// Reports feature imports
+import '../../features/reports/data/repositories/report_repository_impl.dart';
+import '../../features/reports/domain/repositories/report_repository.dart';
+
 // Printing feature imports
 import '../../features/printing/data/datasources/pdf_generator.dart';
 import '../../features/printing/data/datasources/printing_service.dart';
@@ -101,6 +115,9 @@ Future<void> _initFeatures() async {
   await _initProductsFeature();
   await _initCartFeature();
   await _initOrdersFeature();
+  await _initInventoryFeature();
+  await _initPromotionsFeature();
+  await _initReportsFeature();
   await _initPrintingFeature();
 }
 
@@ -168,7 +185,26 @@ Future<void> _initOrdersFeature() async {
   sl.registerLazySingleton<CreateOrder>(() => CreateOrder(sl()));
   
   sl.registerLazySingleton<GetAllOrders>(() => GetAllOrders(sl()));
-    sl.registerLazySingleton<GetOrdersByDateRange>(() => GetOrdersByDateRange(sl()));
+  sl.registerLazySingleton<GetOrdersByDateRange>(() => GetOrdersByDateRange(sl()));
+}
+
+/// Inicializa dependências do módulo Inventory
+Future<void> _initInventoryFeature() async {
+  final dataSource = await InventoryLocalDataSourceImpl.init();
+  sl.registerLazySingleton<InventoryLocalDataSource>(() => dataSource);
+  sl.registerLazySingleton<InventoryRepository>(() => InventoryRepositoryImpl(sl()));
+}
+
+/// Inicializa dependências do módulo Promotions
+Future<void> _initPromotionsFeature() async {
+  final dataSource = await PromotionLocalDataSourceImpl.init();
+  sl.registerLazySingleton<PromotionLocalDataSource>(() => dataSource);
+  sl.registerLazySingleton<PromotionRepository>(() => PromotionRepositoryImpl(sl()));
+}
+
+/// Inicializa dependências do módulo Reports
+Future<void> _initReportsFeature() async {
+  sl.registerLazySingleton<ReportRepository>(() => ReportRepositoryImpl(sl()));
 }
 
 /// Inicializa dependências do módulo Printing

@@ -7,6 +7,10 @@ import '../features/cart/presentation/providers/cart_provider.dart';
 import '../screens/menu_screen.dart';
 import '../screens/orders/order_history_screen.dart';
 import '../widgets/cart_panel.dart';
+import '../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../features/inventory/presentation/screens/inventory_screen.dart';
+import '../features/promotions/presentation/screens/promotions_screen.dart';
+import '../features/reports/presentation/screens/reports_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -342,7 +346,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         _buildHomeScreen(),
         _buildMenuWithCart(),
         _buildHistoryScreen(),
-        _buildPromosScreen(),
+        const DashboardScreen(),
+        const InventoryScreen(),
+        const PromotionsScreen(),
+        const ReportsScreen(),
         _buildSettingsScreen(),
       ],
     );
@@ -478,15 +485,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
   Widget _buildHistoryScreen() {
     return const OrderHistoryScreen();
-  }
-
-  Widget _buildPromosScreen() {
-    return _buildFeatureScreen(
-      FluentIcons.emoji,
-      'Promoções',
-      'Gerencie ofertas promocionais',
-      AppColors.tertiaryAccent,
-    );
   }
 
   Widget _buildSettingsScreen() {
