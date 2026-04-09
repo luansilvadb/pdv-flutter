@@ -1,6 +1,6 @@
-# Sprint v2.1.0 - Processamento de Vendas
+# Sprint v2.2.0 - Gestão Avançada
 
-- [x] Finalização de pedidos
-- [x] Métodos de pagamento
-- [x] Impressão de cupons
-- [x] Histórico de vendas
+- [ ] Relatórios detalhados
+- [ ] Gestão de estoque
+- [ ] Sistema de promoções
+- [ ] Dashboard gerencial
